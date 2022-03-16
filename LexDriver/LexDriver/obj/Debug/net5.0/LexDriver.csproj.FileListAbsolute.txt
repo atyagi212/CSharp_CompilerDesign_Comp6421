@@ -1,0 +1,46 @@
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/LexDriver.exe
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/LexDriver.deps.json
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/LexDriver.runtimeconfig.json
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/LexDriver.runtimeconfig.dev.json
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/ref/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/bin/Debug/net5.0/LexDriver.pdb
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.GeneratedMSBuildEditorConfig.editorconfig
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.AssemblyInfoInputs.cache
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.AssemblyInfo.cs
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.csproj.CoreCompileInputs.cache
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/ref/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.pdb
+C:/Users/Akshat Tyagi/source/repos/Compiler/Compiler/obj/Debug/net5.0/LexDriver.genruntimeconfig.cache
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.exe
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.deps.json
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.runtimeconfig.json
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.runtimeconfig.dev.json
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/ref/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.pdb
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.GeneratedMSBuildEditorConfig.editorconfig
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.AssemblyInfoInputs.cache
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.AssemblyInfo.cs
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.csproj.CoreCompileInputs.cache
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/ref/LexDriver.dll
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.pdb
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.genruntimeconfig.cache
+C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.csproj.AssemblyReference.cache
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.deps.json
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.runtimeconfig.json
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.runtimeconfig.dev.json
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.dll
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/ref/LexDriver.dll
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.pdb
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.csproj.AssemblyReference.cache
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.GeneratedMSBuildEditorConfig.editorconfig
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.AssemblyInfoInputs.cache
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.AssemblyInfo.cs
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.csproj.CoreCompileInputs.cache
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.dll
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/ref/LexDriver.dll
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.pdb
+/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.genruntimeconfig.cache
