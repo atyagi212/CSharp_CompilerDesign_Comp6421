@@ -40,7 +40,10 @@ func printArray(arr: integer[], size: integer) -> void
 // main funtion to test above
 func main() -> void
 {
-  let arr: integer[7];
+  let arr1: integer;
+  let arr2: integer[];
+  let arr3: integer[7];
+  let arr4: integer[7][8];
   arr[0] = 64;
   arr[1] = 34;
   arr[2] = 25;

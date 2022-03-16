@@ -1,20 +1,16 @@
 ﻿<Properties StartupConfiguration="{ADC72848-D1AE-4268-A35D-276D7B18C2F4}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="LexDriver/OutputFiles/polynomial.outsymboltables">
+  <MonoDevelop.Ide.Workbench ActiveDocument="LexDriver/Asg1.cs">
     <Files>
       <File FileName="LexDriver/Asg1.cs" Line="113" Column="1" />
-      <File FileName="LexDriver/SymbolTableGenerator.cs" Line="77" Column="1" />
+      <File FileName="LexDriver/SymbolTableGenerator.cs" Line="169" Column="113" />
       <File FileName="LexDriver/SyntaxAnalysis.cs" Line="69" Column="1" />
-      <File FileName="LexDriver/OutputFiles/bubblesort.outsymboltables" Line="1" Column="1" />
-      <File FileName="LexDriver/OutputFiles/polynomial.outsymboltables" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="LexDriver" expanded="True">
             <Node name="LexDriver" expanded="True">
-              <Node name="OutputFiles" expanded="True">
-                <Node name="polynomial.outsymboltables" selected="True" />
-              </Node>
+              <Node name="Asg1.cs" selected="True" />
             </Node>
           </Node>
         </State>

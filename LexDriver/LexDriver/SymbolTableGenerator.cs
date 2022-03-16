@@ -74,6 +74,7 @@ namespace LexDriver
                 File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|     | inherit     | none \n");
             WriteClassvariable(node);
             WriteClassMethods(node, rootNodes, defnitionNode.value);
+            //WriteFunctionTable(node, rootNodes, defnitionNode.value);
         }
 
         private void WriteClassvariable(ASTNode node)
@@ -82,19 +83,20 @@ namespace LexDriver
             {
                 if (childNode.label == "varDecl")
                 {
-                    WriteVariableTable(childNode);
+                    var visibility = node.Children.Find(x => x.label == "visibility").value;
+                    WriteVariableTable(childNode, visibility);
                 }
                 WriteClassvariable(childNode);
             }
         }
 
-        private void WriteVariableTable(ASTNode childNode)
+        private void WriteVariableTable(ASTNode childNode, string visibility)
         {
             var defnitionNode = childNode.Children.Find(x => x.label == "id");
             var defnitionType = childNode.Children.Find(x => x.label == "type");
             if (defnitionNode != null && defnitionType != null)
             {
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|     | data      | " + defnitionNode.value + "      | " + defnitionType.value + "\n");
+                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|     | data      | " + defnitionNode.value + "      | " + defnitionType.value + "  | " + visibility + "\n");
             }
         }
 
@@ -104,7 +106,9 @@ namespace LexDriver
             {
                 if (childNode.label == "funcDecl")
                 {
-                    WriteFunctionTable(childNode, rootNodes, className);
+                    var visibility = node.Children.Find(x => x.label == "visibility").value;
+                    var funcName = childNode.Children.Find(x => x.label == "id").value;
+                    WriteFunctionTable(childNode, rootNodes, className, visibility, funcName);
                 }
                 WriteClassMethods(childNode, rootNodes, className);
             }
@@ -123,7 +127,7 @@ namespace LexDriver
             }
         }
 
-        public void WriteFunctionTable(ASTNode node, List<ASTNode> rootNodes = null, string className = "")
+        public void WriteFunctionTable(ASTNode node, List<ASTNode> rootNodes = null, string className = "", string visibility = "", string funcName = "")
         {
             if (className == string.Empty)
             {
@@ -141,7 +145,8 @@ namespace LexDriver
                             var functionDefList = childImplNode.Children.Find(x => x.label == "funcDefList").Children.FindAll(y => y.label == "funcDef");
                             foreach (var funcNode in functionDefList)
                             {
-                                MethodWriting(funcNode);
+                                if (funcNode.Children.Find(x => x.label == "id").value == funcName)
+                                    MethodWriting(funcNode, visibility);
                             }
                         }
                     }
@@ -149,7 +154,7 @@ namespace LexDriver
             }
         }
 
-        private void MethodWriting(ASTNode node)
+        private void MethodWriting(ASTNode node, string visibility = "")
         {
             var defnitionNode = node.Children.Find(x => x.label == "id");
             var defnitionType = node.Children.Find(x => x.label == "type");
@@ -164,7 +169,11 @@ namespace LexDriver
                     {
                         if (paramNode.Children != null && paramNode.Children.Count > 0)
                         {
-                            fparamString = fparamString + paramNode.Children.Find(x => x.label == "type").value + ", ";
+                            fparamString = fparamString + paramNode.Children.Find(x => x.label == "type").value;
+                            if (paramNode.Children.Find(x => x.label == "dimList").Children.Count > 0)
+                                fparamString = fparamString + "[], ";
+                            else
+                                fparamString = fparamString + ", ";
                         }
                     }
                     fparamString = fparamString.Trim().TrimEnd(',');
@@ -174,7 +183,13 @@ namespace LexDriver
                 else
                     File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "     | ()");
                 if (defnitionType != null)
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), ": " + defnitionType.value + "\n");
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), ": " + defnitionType.value);
+
+                if (!string.IsNullOrEmpty(visibility))
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "  | " + visibility + "\n");
+                else
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "\n");
+
                 File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|    ==============================================================================\n");
                 File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|     | table: " + defnitionNode.value + "\n");
                 File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|    ==============================================================================\n");
@@ -183,15 +198,15 @@ namespace LexDriver
             {
                 if (childNode.label == "statementBlock")
                 {
-                    var prevNode = new ASTNode();
                     foreach (var variableNode in childNode.Children)
                     {
-
                         if (variableNode.label == "id")
                         {
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|     | local      | " + variableNode.value + "      | " + prevNode.value + "\n");
+                            var variableNodeIndex = childNode.Children.IndexOf(variableNode);
+                            var type = childNode.Children[variableNodeIndex - 1].value;
+                            var dimListNode = (childNode.Children[variableNodeIndex - 2].Children.Count > 0) ? "[]" : "";
+                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsymboltables"), "|     | local      | " + variableNode.value + "      | " + type + dimListNode + "\n");
                         }
-                        prevNode = variableNode;
                     }
                 }
             }

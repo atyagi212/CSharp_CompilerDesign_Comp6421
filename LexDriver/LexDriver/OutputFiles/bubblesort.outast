@@ -76,9 +76,20 @@ prog - $
 |	|	|	|	|	|	var0 - [
 |	|	|	|	|	|	|	id - arr
 |	|	|	|	dimList - ;
+|	|	|	|	|	num - 8
 |	|	|	|	|	num - 7
 |	|	|	|	type - integer
-|	|	|	|	id - arr
+|	|	|	|	id - arr4
+|	|	|	|	dimList - ;
+|	|	|	|	|	num - 7
+|	|	|	|	type - integer
+|	|	|	|	id - arr3
+|	|	|	|	dimList - ;
+|	|	|	|	type - integer
+|	|	|	|	id - arr2
+|	|	|	|	dimList - ;
+|	|	|	|	type - integer
+|	|	|	|	id - arr1
 |	|	|	type - void
 |	|	|	fparamList - )
 |	|	|	id - main
