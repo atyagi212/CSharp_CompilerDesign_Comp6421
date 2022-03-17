@@ -35,7 +35,6 @@ C:/Users/Akshat Tyagi/source/repos/LexDriver/LexDriver/obj/Debug/net5.0/LexDrive
 /Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.dll
 /Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/ref/LexDriver.dll
 /Users/akshattyagi/Downloads/LexDriver/LexDriver/bin/Debug/net5.0/LexDriver.pdb
-/Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.csproj.AssemblyReference.cache
 /Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.GeneratedMSBuildEditorConfig.editorconfig
 /Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.AssemblyInfoInputs.cache
 /Users/akshattyagi/Downloads/LexDriver/LexDriver/obj/Debug/net5.0/LexDriver.AssemblyInfo.cs

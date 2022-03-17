@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,8 @@ namespace LexDriver
         public string label { get; set; }
         public string value { get; set; }
         public List<ASTNode> Children { get; set; }
-        public SymTab m_symtab { get; set; }
+        public DataTable m_symtab { get; set; }
+        public SymbolEntry entry { get; set; }
 
         public ASTNode(string label)
         {
@@ -30,5 +32,6 @@ namespace LexDriver
         {
 
         }
+
     }
 }
