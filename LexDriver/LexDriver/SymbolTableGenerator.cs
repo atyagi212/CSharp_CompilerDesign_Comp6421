@@ -15,12 +15,8 @@ namespace LexDriver
             this.fileName = outputfilename;
         }
 
-        public void PrintTable(ASTNode p_Node)
+        public ASTNode PrintTable(ASTNode p_Node)
         {
-            string nodeName = string.Empty;
-            ASTNode temp = new ASTNode();
-            temp = p_Node;
-
             var listImplementationNode = p_Node.Children.Find(x => x.label == "STRUCTORIMPLORFUNCLIST").Children;
             foreach (var node in listImplementationNode)
             {
@@ -30,17 +26,16 @@ namespace LexDriver
                     case "structDecl":
                         {
                             ASTNode result = WriteClassTable(node, listImplementationNode);
-                            //temp.Children.Find(x => x.label == "STRUCTORIMPLORFUNCLIST").Children[listImplementationNode.IndexOf(node)] = result;
                             break;
                         }
                     case "funcDef":
                         {
                             ASTNode result = WriteFunctionTable(node);
-                            //temp.Children.Find(x => x.label == "STRUCTORIMPLORFUNCLIST").Children[listImplementationNode.IndexOf(node)] = result;
                             break;
                         }
                 }
             }
+            return p_Node;
 
         }
 

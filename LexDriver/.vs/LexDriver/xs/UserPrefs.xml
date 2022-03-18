@@ -1,28 +1,27 @@
 ﻿<Properties StartupConfiguration="{ADC72848-D1AE-4268-A35D-276D7B18C2F4}|Default">
-  <MonoDevelop.Ide.Workbench ActiveDocument="LexDriver/OutputFiles/polynomial.outsymboltables">
+  <MonoDevelop.Ide.Workbench ActiveDocument="LexDriver/OutputFiles/polynomialsemanticerrors.outsemanticerrors">
     <Files>
-      <File FileName="LexDriver/Asg1.cs" Line="113" Column="1" />
-      <File FileName="LexDriver/SymbolTableGenerator.cs" Line="45" Column="1" />
-      <File FileName="LexDriver/SyntaxAnalysis.cs" Line="38" Column="1" />
-      <File FileName="LexDriver/ASTNode.cs" />
-      <File FileName="LexDriver/SymTab.cs" />
-      <File FileName="LexDriver/SymbolEntry.cs" />
-      <File FileName="LexDriver/OutputFiles/polynomial.outsymboltables" Line="1" Column="1" />
+      <File FileName="LexDriver/Asg1.cs" Line="122" Column="1" />
+      <File FileName="LexDriver/SymbolTableGenerator.cs" Line="19" Column="1" />
+      <File FileName="LexDriver/SemanticErrorVisitor.cs" Line="71" Column="1" />
+      <File FileName="LexDriver/SymbolEntry.cs" Line="14" Column="35" />
+      <File FileName="LexDriver/ASTNode.cs" Line="18" Column="15" />
+      <File FileName="LexDriver/SyntaxAnalysis.cs" Line="69" Column="233" />
+      <File FileName="LexDriver/OutputFiles/polynomialsemanticerrors.outsymboltables" Line="1" Column="1" />
+      <File FileName="LexDriver/OutputFiles/polynomialsemanticerrors.outsemanticerrors" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="LexDriver" expanded="True">
-            <Node name="LexDriver" expanded="True">
-              <Node name="OutputFiles" expanded="True">
-                <Node name="polynomial.outsymboltables" selected="True" />
-              </Node>
-            </Node>
+            <Node name="LexDriver" expanded="True" />
           </Node>
         </State>
       </Pad>
       <Pad Id="MonoDevelop.Debugger.WatchPad">
-        <State />
+        <State>
+          <Value>p_Node</Value>
+        </State>
       </Pad>
     </Pads>
   </MonoDevelop.Ide.Workbench>
@@ -33,17 +32,15 @@
     <BreakpointStore>
       <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="9" column="9" />
       <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="404" column="25" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="93" column="25" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="98" column="25" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="113" column="25" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="19" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="45" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="79" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="96" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="111" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="130" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="158" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SymbolTableGenerator.cs" relfile="LexDriver/SymbolTableGenerator.cs" line="48" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="17" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="122" column="25" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="127" column="25" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="77" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="41" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="57" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="71" column="13" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="80" column="13" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="70" column="21" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />

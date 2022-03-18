@@ -22,7 +22,7 @@ namespace LexDriver
         public bool PushInStack(string label)
         {
             //st.Push(new ASTNode(label));
-            if (prevToken != null) st.Push(new ASTNode(label, prevToken._content));
+            if (prevToken != null) st.Push(new ASTNode(label, prevToken._content, token._lineNumber));
             else st.Push(new ASTNode(label));
             return true;
         }
@@ -30,7 +30,7 @@ namespace LexDriver
         public bool PopFromStack(string label, int noOfChildren)
         {
             //ASTNode parent = new ASTNode(label);
-            ASTNode parent = new ASTNode(label, token._content);
+            ASTNode parent = new ASTNode(label, token._content, token._lineNumber);
             Console.WriteLine("PopFromStack: " + label + ": ");
             while (noOfChildren > 0 && st.Count() > 0)
             {
@@ -47,7 +47,7 @@ namespace LexDriver
         public bool PopFromStackUntilEpsilon(string label)
         {
             //ASTNode parent = new ASTNode(label);
-            ASTNode parent = new ASTNode(label, token._content);
+            ASTNode parent = new ASTNode(label, token._content, token._lineNumber);
             Console.WriteLine("PopFromStackUntilEpsilon: " + label + ": ");
             while (!st.Peek().label.Equals("epsilon"))
             {
@@ -66,7 +66,7 @@ namespace LexDriver
             for (int i = 0; i < depth; i++)
                 File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outast"), "|\t");
             //File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outast"), Node.label + "\n");
-            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outast"), Node.label + " - " + Node.value + "\n");
+            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outast"), Node.label + "(value: " + Node.value + ", line: " + Node.line + ")\n");
             foreach (ASTNode child in Node.Children)
             {
                 printAST(child, depth + 1, fileName);
@@ -315,12 +315,12 @@ namespace LexDriver
             if (firstSet.Contains(lookahead))
             {
                 if (EXPR() && REPTAPARAMS1())
-                writeOutDerivation("APARAMS -> EXPR REPTAPARAMS1");
+                    writeOutDerivation("APARAMS -> EXPR REPTAPARAMS1");
                 else
                     error = true;
             }
             else if (followSet.Contains(lookahead))
-            writeOutDerivation("APARAMS -> epsilon");
+                writeOutDerivation("APARAMS -> epsilon");
 
             else
                 error = true;
@@ -337,12 +337,12 @@ namespace LexDriver
             if (firstSet.Contains(lookahead))
             {
                 if (APARAMSTAIL() && REPTAPARAMS1())
-                writeOutDerivation("REPTAPARAMS1-> APARAMSTAIL REPTAPARAMS1");
+                    writeOutDerivation("REPTAPARAMS1-> APARAMSTAIL REPTAPARAMS1");
                 else
                     error = true;
             }
             else if (followSet.Contains(lookahead))
-            writeOutDerivation("REPTAPARAMS1 -> epsilon");
+                writeOutDerivation("REPTAPARAMS1 -> epsilon");
 
             else
                 error = true;
@@ -359,7 +359,7 @@ namespace LexDriver
             if (lookahead.Equals("comma"))
             {
                 if (Match("comma") && EXPR())
-                writeOutDerivation("APARAMSTAIL -> comma EXPR");
+                    writeOutDerivation("APARAMSTAIL -> comma EXPR");
                 else
                     error = true;
             }
@@ -379,21 +379,21 @@ namespace LexDriver
             if (lookahead.Equals("plus"))
             {
                 if (Match("plus"))
-                writeOutDerivation("AddOP -> plus");
+                    writeOutDerivation("AddOP -> plus");
                 else
                     error = true;
             }
             else if (lookahead.Equals("minus"))
             {
                 if (Match("minus"))
-                writeOutDerivation("AddOP -> minus");
+                    writeOutDerivation("AddOP -> minus");
                 else
                     error = true;
             }
             else if (lookahead.Equals("or"))
             {
                 if (Match("or"))
-                writeOutDerivation("AddOP -> or");
+                    writeOutDerivation("AddOP -> or");
                 else
                     error = true;
             }
@@ -413,7 +413,7 @@ namespace LexDriver
             if (lookahead.Equals("intnum") || lookahead.Equals("floatnum") || lookahead.Equals("openpar") || lookahead.Equals("not") || lookahead.Equals("id") || lookahead.Equals("plus") || lookahead.Equals("minus"))
             {
                 if (TERM() && RIGHTRECARITHEXPR())
-                writeOutDerivation("ARITHEXPR -> TERM RIGHTRECARITHEXPR");
+                    writeOutDerivation("ARITHEXPR -> TERM RIGHTRECARITHEXPR");
                 else
                     error = true;
             }
@@ -433,12 +433,12 @@ namespace LexDriver
             if (lookahead.Equals("plus") || lookahead.Equals("minus") || lookahead.Equals("or"))
             {
                 if (AddOP() && TERM() && PopFromStack("addOp", 2) && RIGHTRECARITHEXPR())
-                writeOutDerivation("RIGHTRECARITHEXPR -> AddOP TERM RIGHTRECARITHEXPR");
+                    writeOutDerivation("RIGHTRECARITHEXPR -> AddOP TERM RIGHTRECARITHEXPR");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closesqbr") || lookahead.Equals("eq") || lookahead.Equals("neq") || lookahead.Equals("lt") || lookahead.Equals("gt") || lookahead.Equals("leq") || lookahead.Equals("geq") || lookahead.Equals("comma") || lookahead.Equals("closepar") || lookahead.Equals("semi"))
-            writeOutDerivation("RIGHTRECARITHEXPR -> epsilon");
+                writeOutDerivation("RIGHTRECARITHEXPR -> epsilon");
             else
                 error = true;
 
@@ -454,12 +454,12 @@ namespace LexDriver
             if (lookahead.Equals("mult") || lookahead.Equals("div") || lookahead.Equals("and"))
             {
                 if (MULTOP() && FACTOR() && PopFromStack("multOp", 2) && RIGHTRECTERM())
-                writeOutDerivation("RIGHTRECTERM -> MULTOP FACTOR RIGHTRECTERM");
+                    writeOutDerivation("RIGHTRECTERM -> MULTOP FACTOR RIGHTRECTERM");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closesqbr") || lookahead.Equals("eq") || lookahead.Equals("neq") || lookahead.Equals("lt") || lookahead.Equals("gt") || lookahead.Equals("leq") || lookahead.Equals("geq") || lookahead.Equals("plus") || lookahead.Equals("minus") || lookahead.Equals("or") || lookahead.Equals("comma") || lookahead.Equals("closepar") || lookahead.Equals("semi"))
-            writeOutDerivation("RIGHTRECTERM -> epsilon");
+                writeOutDerivation("RIGHTRECTERM -> epsilon");
             else
                 error = true;
 
@@ -475,12 +475,12 @@ namespace LexDriver
             if (lookahead.Equals("if") || lookahead.Equals("while") || lookahead.Equals("read") || lookahead.Equals("write") || lookahead.Equals("return") || lookahead.Equals("id"))
             {
                 if (STATEMENT() && REPTSTATBLOCK1())
-                writeOutDerivation("REPTSTATBLOCK1 -> STATEMENT REPTSTATBLOCK1 ");
+                    writeOutDerivation("REPTSTATBLOCK1 -> STATEMENT REPTSTATBLOCK1 ");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closecubr"))
-            writeOutDerivation("REPTSTATBLOCK1 -> epsilon");
+                writeOutDerivation("REPTSTATBLOCK1 -> epsilon");
             else
                 error = true;
 
@@ -496,12 +496,12 @@ namespace LexDriver
             if (lookahead.Equals("public") || lookahead.Equals("private"))
             {
                 if (VISIBILITY() && PushInStack("visibility") && MEMBERDECL() && PopFromStack("membDecl", 2) && REPTSTRUCTDECL4())
-                writeOutDerivation("REPTSTRUCTDECL4 -> VISIBILITY MEMBERDECL REPTSTRUCTDECL4");
+                    writeOutDerivation("REPTSTRUCTDECL4 -> VISIBILITY MEMBERDECL REPTSTRUCTDECL4");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closecubr"))
-            writeOutDerivation("REPTSTRUCTDECL4 -> epsilon");
+                writeOutDerivation("REPTSTRUCTDECL4 -> epsilon");
             else
                 error = true;
 
@@ -517,12 +517,12 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (ARRAYSIZE() && REPTVARDECL4())
-                writeOutDerivation("REPTVARDECL4 -> ARRAYSIZE REPTVARDECL4");
+                    writeOutDerivation("REPTVARDECL4 -> ARRAYSIZE REPTVARDECL4");
                 else
                     error = true;
             }
             else if (lookahead.Equals("semi"))
-            writeOutDerivation("REPTVARDECL4 -> epsilon");
+                writeOutDerivation("REPTVARDECL4 -> epsilon");
             else
                 error = true;
 
@@ -538,7 +538,7 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (Match("opensqbr") && ARRAYDASH())
-                writeOutDerivation("ARRAYSIZE -> lsqbr ARRAYDASH");
+                    writeOutDerivation("ARRAYSIZE -> lsqbr ARRAYDASH");
                 else
                     error = true;
             }
@@ -557,14 +557,14 @@ namespace LexDriver
             if (lookahead.Equals("intnum"))
             {
                 if (Match("intnum") && PushInStack("num") && Match("closesqbr"))
-                writeOutDerivation("ARRAYDASH -> intnum rsqbr");
+                    writeOutDerivation("ARRAYDASH -> intnum rsqbr");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closesqbr"))
             {
                 if (Match("closesqbr"))
-                writeOutDerivation("ARRAYDASH -> rsqbr ");
+                    writeOutDerivation("ARRAYDASH -> rsqbr ");
                 else
                     error = true;
             }
@@ -583,7 +583,7 @@ namespace LexDriver
             if (lookahead.Equals("assign"))
             {
                 if (Match("assign"))
-                writeOutDerivation("ASSIGNOP -> equal");
+                    writeOutDerivation("ASSIGNOP -> equal");
                 else
                     error = true;
             }
@@ -602,7 +602,7 @@ namespace LexDriver
             if (lookahead.Equals("intnum") || lookahead.Equals("floatnum") || lookahead.Equals("openpar") || lookahead.Equals("not") || lookahead.Equals("id") || lookahead.Equals("plus") || lookahead.Equals("minus"))
             {
                 if (ARITHEXPR() && EXPRDASH())
-                writeOutDerivation("EXPR -> ARITHEXPR EXPRDASH");
+                    writeOutDerivation("EXPR -> ARITHEXPR EXPRDASH");
                 else
                     error = true;
             }
@@ -622,12 +622,12 @@ namespace LexDriver
             if (lookahead.Equals("eq") || lookahead.Equals("neq") || lookahead.Equals("lt") || lookahead.Equals("gt") || lookahead.Equals("leq") || lookahead.Equals("geq"))
             {
                 if (RELOP() && ARITHEXPR() && PopFromStack("relExp", 3))
-                writeOutDerivation("EXPRDASH -> RELOP ARITHEXPR");
+                    writeOutDerivation("EXPRDASH -> RELOP ARITHEXPR");
                 else
                     error = true;
             }
             else if (lookahead.Equals("semi") || lookahead.Equals("comma") || lookahead.Equals("closepar"))
-            writeOutDerivation("EXPRDASH ->  epsilon");
+                writeOutDerivation("EXPRDASH ->  epsilon");
 
             else
                 error = true;
@@ -644,12 +644,12 @@ namespace LexDriver
             if (lookahead.Equals("id"))
             {
                 if (Match("id") && PushInStack("id") && Match("colon") && TYPE() && PushInStack("epsilon") && REPTFPARAMS3() && PopFromStackUntilEpsilon("dimList") && PopFromStack("fparam", 3) && REPTFPARAMS4())
-                writeOutDerivation("FPARAMS -> id colon TYPE REPTFPARAMS3 REPTFPARAMS4");
+                    writeOutDerivation("FPARAMS -> id colon TYPE REPTFPARAMS3 REPTFPARAMS4");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closepar"))
-            writeOutDerivation("FPARAMS ->  epsilon");
+                writeOutDerivation("FPARAMS ->  epsilon");
 
             else
                 error = true;
@@ -666,12 +666,12 @@ namespace LexDriver
             if (lookahead.Equals("comma"))
             {
                 if (FPARAMSTAIL() && PopFromStack("fparam", 3) && REPTFPARAMS4())
-                writeOutDerivation("REPTFPARAMS4 -> FPARAMSTAIL REPTFPARAMS4");
+                    writeOutDerivation("REPTFPARAMS4 -> FPARAMSTAIL REPTFPARAMS4");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closepar"))
-            writeOutDerivation("REPTFPARAMS4 -> epsilon");
+                writeOutDerivation("REPTFPARAMS4 -> epsilon");
 
             else
                 error = true;
@@ -688,12 +688,12 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (ARRAYSIZE() && REPTFPARAMS3())
-                writeOutDerivation("REPTFPARAMS3 -> ARRAYSIZE REPTFPARAMS3");
+                    writeOutDerivation("REPTFPARAMS3 -> ARRAYSIZE REPTFPARAMS3");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closepar") || lookahead.Equals("comma"))
-            writeOutDerivation("REPTFPARAMS3 -> epsilon");
+                writeOutDerivation("REPTFPARAMS3 -> epsilon");
 
             else
                 error = true;
@@ -710,7 +710,7 @@ namespace LexDriver
             if (lookahead.Equals("comma"))
             {
                 if (Match("comma") && Match("id") && PushInStack("id") && Match("colon") && TYPE() && PushInStack("epsilon") && REPTFPARAMSTAIL4() && PopFromStackUntilEpsilon("dimList"))
-                writeOutDerivation("FPARAMSTAIL -> comma id colon TYPE REPTFPARAMSTAIL4");
+                    writeOutDerivation("FPARAMSTAIL -> comma id colon TYPE REPTFPARAMSTAIL4");
                 else
                     error = true;
             }
@@ -730,12 +730,12 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (ARRAYSIZE() && REPTFPARAMSTAIL4())
-                writeOutDerivation("REPTFPARAMSTAIL4 -> ARRAYSIZE REPTFPARAMSTAIL4");
+                    writeOutDerivation("REPTFPARAMSTAIL4 -> ARRAYSIZE REPTFPARAMSTAIL4");
                 else
                     error = true;
             }
             else if (lookahead.Equals("comma") || lookahead.Equals("closepar"))
-            writeOutDerivation("REPTFPARAMSTAIL4 -> epsilon");
+                writeOutDerivation("REPTFPARAMSTAIL4 -> epsilon");
             else
                 error = true;
 
@@ -751,7 +751,7 @@ namespace LexDriver
             if (lookahead.Equals("intnum"))
             {
                 if (Match("intnum") && PushInStack("intlit"))
-                writeOutDerivation("FACTOR -> intnum");
+                    writeOutDerivation("FACTOR -> intnum");
                 else
                     error = true;
             }
@@ -759,7 +759,7 @@ namespace LexDriver
             else if (lookahead.Equals("floatnum"))
             {
                 if (Match("floatnum") && PushInStack("floatnum"))
-                writeOutDerivation("FACTOR -> floatnum");
+                    writeOutDerivation("FACTOR -> floatnum");
 
                 else
                     error = true;
@@ -768,7 +768,7 @@ namespace LexDriver
             else if (lookahead.Equals("id"))
             {
                 if (PushInStack("epsilon") && PushInStack("epsilon") && REPTVARIABLE0() && PushInStack("id") && PopFromStackUntilEpsilon("var0") && FACTORDASH() && PopFromStackUntilEpsilon("functionCallDataMember"))
-                writeOutDerivation("FACTOR -> REPTVARIABLE0 id FACTORDASH");
+                    writeOutDerivation("FACTOR -> REPTVARIABLE0 id FACTORDASH");
                 else
                     error = true;
             }
@@ -776,7 +776,7 @@ namespace LexDriver
             else if (lookahead.Equals("openpar"))
             {
                 if (Match("openpar") && ARITHEXPR() && Match("closepar"))
-                writeOutDerivation("FACTOR -> lpar ARITHEXPR rpar");
+                    writeOutDerivation("FACTOR -> lpar ARITHEXPR rpar");
                 else
                     error = true;
             }
@@ -784,7 +784,7 @@ namespace LexDriver
             else if (lookahead.Equals("minus"))
             {
                 if (SIGN() && FACTOR() && PopFromStack("sign", 1))
-                writeOutDerivation("FACTOR -> SIGN FACTOR");
+                    writeOutDerivation("FACTOR -> SIGN FACTOR");
                 else
                     error = true;
             }
@@ -792,7 +792,7 @@ namespace LexDriver
             else if (lookahead.Equals("plus"))
             {
                 if (SIGN() && FACTOR() && PopFromStack("sign", 1))
-                writeOutDerivation("FACTOR -> SIGN FACTOR");
+                    writeOutDerivation("FACTOR -> SIGN FACTOR");
                 else
                     error = true;
             }
@@ -800,7 +800,7 @@ namespace LexDriver
             else if (lookahead.Equals("not"))
             {
                 if (Match("not") && FACTOR() && PopFromStack("not", 1))
-                writeOutDerivation("FACTOR -> not FACTOR");
+                    writeOutDerivation("FACTOR -> not FACTOR");
                 else
                     error = true;
             }
@@ -827,7 +827,7 @@ namespace LexDriver
                         error = true;
                 }
                 else
-                writeOutDerivation("REPTVARIABLE0 -> epsilon");
+                    writeOutDerivation("REPTVARIABLE0 -> epsilon");
             }
 
             else
@@ -845,19 +845,19 @@ namespace LexDriver
             if (lookahead.Equals("openpar"))
             {
                 if (Match("openpar") && PushInStack("epsilon") && APARAMS() && PopFromStackUntilEpsilon("aParams") && Match("closepar"))
-                writeOutDerivation("FACTORDASH -> lpar APARAMS rpar");
+                    writeOutDerivation("FACTORDASH -> lpar APARAMS rpar");
                 else
                     error = true;
             }
             else if (lookahead.Equals("opensqbr"))
             {
                 if (PushInStack("epsilon") && REPTVARIABLE2() && PopFromStackUntilEpsilon("indiceList"))
-                writeOutDerivation("FACTORDASH -> REPTVARIABLE2");
+                    writeOutDerivation("FACTORDASH -> REPTVARIABLE2");
                 else
                     error = true;
             }
             else if (lookahead.Equals("mult") || lookahead.Equals("div") || lookahead.Equals("and") || lookahead.Equals("closesqbr") || lookahead.Equals("eq") || lookahead.Equals("neq") || lookahead.Equals("lt") || lookahead.Equals("gt") || lookahead.Equals("leq") || lookahead.Equals("geq") || lookahead.Equals("plus") || lookahead.Equals("minus") || lookahead.Equals("or") || lookahead.Equals("comma") || lookahead.Equals("closepar") || lookahead.Equals("semi"))
-            writeOutDerivation("FACTORDASH -> epsilon");
+                writeOutDerivation("FACTORDASH -> epsilon");
             else
                 error = true;
 
@@ -873,12 +873,12 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (INDICE() && REPTVARIABLE2())
-                writeOutDerivation("REPTVARIABLE2 -> INDICE REPTVARIABLE2");
+                    writeOutDerivation("REPTVARIABLE2 -> INDICE REPTVARIABLE2");
                 else
                     error = true;
             }
             else if (lookahead.Equals("mult") || lookahead.Equals("div") || lookahead.Equals("and") || lookahead.Equals("closesqbr") || lookahead.Equals("eq") || lookahead.Equals("neq") || lookahead.Equals("lt") || lookahead.Equals("gt") || lookahead.Equals("leq") || lookahead.Equals("geq") || lookahead.Equals("assign") || lookahead.Equals("plus") || lookahead.Equals("minus") || lookahead.Equals("or") || lookahead.Equals("comma") || lookahead.Equals("closepar") || lookahead.Equals("semi"))
-            writeOutDerivation("REPTVARIABLE2 -> epsilon");
+                writeOutDerivation("REPTVARIABLE2 -> epsilon");
             else
                 error = true;
 
@@ -894,7 +894,7 @@ namespace LexDriver
             if (lookahead.Equals("opencubr"))
             {
                 if (Match("opencubr") && PushInStack("epsilon") && REPTFUNCBODY1() && PopFromStackUntilEpsilon("statementBlock") && Match("closecubr"))
-                writeOutDerivation("FUNCBODY -> lcurbr REPTFUNCBODY1 rcurbr ");
+                    writeOutDerivation("FUNCBODY -> lcurbr REPTFUNCBODY1 rcurbr ");
                 else
                     error = true;
             }
@@ -913,12 +913,12 @@ namespace LexDriver
             if (lookahead.Equals("let") || lookahead.Equals("if") || lookahead.Equals("while") || lookahead.Equals("read") || lookahead.Equals("write") || lookahead.Equals("return") || lookahead.Equals("id"))
             {
                 if (VARDECLORSTAT() && REPTFUNCBODY1())
-                writeOutDerivation("REPTFUNCBODY1 -> VARDECLORSTAT REPTFUNCBODY1");
+                    writeOutDerivation("REPTFUNCBODY1 -> VARDECLORSTAT REPTFUNCBODY1");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closecubr"))
-            writeOutDerivation("REPTFUNCBODY1 -> epsilon");
+                writeOutDerivation("REPTFUNCBODY1 -> epsilon");
             else
                 error = true;
 
@@ -934,7 +934,7 @@ namespace LexDriver
             if (lookahead.Equals("func"))
             {
                 if (FUNCHEAD() && Match("semi"))
-                writeOutDerivation("FUNCDECL -> FUNCHEAD semi");
+                    writeOutDerivation("FUNCDECL -> FUNCHEAD semi");
 
                 else
                     error = true;
@@ -955,7 +955,7 @@ namespace LexDriver
             if (lookahead.Equals("func"))
             {
                 if (FUNCHEAD() && FUNCBODY())
-                writeOutDerivation("FUNCDEF -> FUNCHEAD FUNCBODY");
+                    writeOutDerivation("FUNCDEF -> FUNCHEAD FUNCBODY");
                 else
                     error = true;
             }
@@ -974,7 +974,7 @@ namespace LexDriver
             if (lookahead.Equals("func"))
             {
                 if (Match("func") && Match("id") && PushInStack("id") && Match("openpar") && PushInStack("epsilon") && FPARAMS() && PopFromStackUntilEpsilon("fparamList") && Match("closepar") && Match("arrow") && RETURNTYPE())
-                writeOutDerivation("FUNCHEAD -> func id lpar FPARAMS rpar arrow RETURNTYPE");
+                    writeOutDerivation("FUNCHEAD -> func id lpar FPARAMS rpar arrow RETURNTYPE");
                 else
                     error = true;
             }
@@ -993,7 +993,7 @@ namespace LexDriver
             if (lookahead.Equals("dot"))
             {
                 if (PushInStack("id") && IDNESTDASH())
-                writeOutDerivation("IDNEST-> id IDNESTDASH");
+                    writeOutDerivation("IDNEST-> id IDNESTDASH");
 
                 else
                     error = true;
@@ -1013,21 +1013,21 @@ namespace LexDriver
             if (lookahead.Equals("openpar"))
             {
                 if (Match("openpar") && PushInStack("epsilon") && APARAMS() && PopFromStackUntilEpsilon("aParams") && Match("closepar") && Match("dot") && PopFromStack("dot", 2))
-                writeOutDerivation("IDNESTDASH -> lpar APARAMS rpar dot");
+                    writeOutDerivation("IDNESTDASH -> lpar APARAMS rpar dot");
                 else
                     error = true;
             }
             else if (lookahead.Equals("opensqbr"))
             {
                 if (PushInStack("epsilon") && REPTIDNEST1() && PopFromStackUntilEpsilon("indiceList") && Match("dot") && PopFromStack("dot", 2))
-                writeOutDerivation("IDNESTDASH -> REPTIDNEST1 dot");
+                    writeOutDerivation("IDNESTDASH -> REPTIDNEST1 dot");
                 else
                     error = true;
             }
             else if (lookahead.Equals("dot"))
             {
                 if (PushInStack("epsilon") && REPTIDNEST1() && PopFromStackUntilEpsilon("indiceList") && Match("dot") && PopFromStack("dot", 2))
-                writeOutDerivation("IDNESTDASH -> REPTIDNEST1 dot");
+                    writeOutDerivation("IDNESTDASH -> REPTIDNEST1 dot");
                 else
                     error = true;
             }
@@ -1046,12 +1046,12 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (INDICE() && REPTIDNEST1())
-                writeOutDerivation("REPTIDNEST1 -> INDICE REPTIDNEST1 ");
+                    writeOutDerivation("REPTIDNEST1 -> INDICE REPTIDNEST1 ");
                 else
                     error = true;
             }
             else if (lookahead.Equals("dot"))
-            writeOutDerivation("REPTIDNEST1 -> epsilon");
+                writeOutDerivation("REPTIDNEST1 -> epsilon");
             else
                 error = true;
 
@@ -1067,7 +1067,7 @@ namespace LexDriver
             if (lookahead.Equals("impl"))
             {
                 if (Match("impl") && Match("id") && PushInStack("id") && Match("opencubr") && PushInStack("epsilon") && REPTIMPLDEF3() && PopFromStackUntilEpsilon("funcDefList") && Match("closecubr"))
-                writeOutDerivation("IMPLDEF -> impl id lcurbr REPTIMPLDEF3 rcurbr");
+                    writeOutDerivation("IMPLDEF -> impl id lcurbr REPTIMPLDEF3 rcurbr");
                 else
                     error = true;
             }
@@ -1086,12 +1086,12 @@ namespace LexDriver
             if (lookahead.Equals("func"))
             {
                 if (FUNCDEF() && PopFromStack("funcDef", 4) && REPTIMPLDEF3())
-                writeOutDerivation("REPTIMPLDEF3 -> FUNCDEF REPTIMPLDEF3 ");
+                    writeOutDerivation("REPTIMPLDEF3 -> FUNCDEF REPTIMPLDEF3 ");
                 else
                     error = true;
             }
             else if (lookahead.Equals("closecubr"))
-            writeOutDerivation("REPTIMPLDEF3 -> epsilon");
+                writeOutDerivation("REPTIMPLDEF3 -> epsilon");
 
             else
                 error = true;
@@ -1108,7 +1108,7 @@ namespace LexDriver
             if (lookahead.Equals("opensqbr"))
             {
                 if (Match("opensqbr") && ARITHEXPR() && Match("closesqbr"))
-                writeOutDerivation("INDICE -> lsqbr ARITHEXPR rsqbr ");
+                    writeOutDerivation("INDICE -> lsqbr ARITHEXPR rsqbr ");
                 else
                     error = true;
             }
@@ -1127,14 +1127,14 @@ namespace LexDriver
             if (lookahead.Equals("func"))
             {
                 if (FUNCDECL() && PopFromStack("funcDecl", 3))
-                writeOutDerivation("MEMBERDECL -> FUNCDECL");
+                    writeOutDerivation("MEMBERDECL -> FUNCDECL");
                 else
                     error = true;
             }
             else if (lookahead.Equals("let"))
             {
                 if (VARDECL() && PopFromStack("varDecl", 3))
-                writeOutDerivation("MEMBERDECL -> VARDECL");
+                    writeOutDerivation("MEMBERDECL -> VARDECL");
                 else
                     error = true;
             }
@@ -1153,21 +1153,21 @@ namespace LexDriver
             if (lookahead.Equals("mult"))
             {
                 if (Match("mult"))
-                writeOutDerivation("MULTOP -> mult");
+                    writeOutDerivation("MULTOP -> mult");
                 else
                     error = true;
             }
             else if (lookahead.Equals("div"))
             {
                 if (Match("div"))
-                writeOutDerivation("MULTOP -> div");
+                    writeOutDerivation("MULTOP -> div");
                 else
                     error = true;
             }
             else if (lookahead.Equals("and"))
             {
                 if (Match("and"))
-                writeOutDerivation("MULTOP -> and");
+                    writeOutDerivation("MULTOP -> and");
                 else
                     error = true;
             }
@@ -1186,12 +1186,12 @@ namespace LexDriver
             if (lookahead.Equals("inherits"))
             {
                 if (Match("inherits") && Match("id") && PushInStack("id") && REPTOPTSTRUCTDECL22())
-                writeOutDerivation("OPTSTRUCTDECL2 -> inherits id REPTOPTSTRUCTDECL22");
+                    writeOutDerivation("OPTSTRUCTDECL2 -> inherits id REPTOPTSTRUCTDECL22");
                 else
                     error = true;
             }
             else if (lookahead.Equals("opencubr"))
-            writeOutDerivation("OPTSTRUCTDECL2 -> epsilon");
+                writeOutDerivation("OPTSTRUCTDECL2 -> epsilon");
 
             else
                 error = true;
@@ -1208,12 +1208,12 @@ namespace LexDriver
             if (lookahead.Equals("comma"))
             {
                 if (Match("comma") && Match("id") && PushInStack("id") && REPTOPTSTRUCTDECL22())
-                writeOutDerivation("REPTOPTSTRUCTDECL22 -> comma id REPTOPTSTRUCTDECL22");
+                    writeOutDerivation("REPTOPTSTRUCTDECL22 -> comma id REPTOPTSTRUCTDECL22");
                 else
                     error = true;
             }
             else if (lookahead.Equals("opencubr"))
-            writeOutDerivation("REPTOPTSTRUCTDECL22 -> epsilon");
+                writeOutDerivation("REPTOPTSTRUCTDECL22 -> epsilon");
 
             else
                 error = true;
@@ -1230,7 +1230,7 @@ namespace LexDriver
             if (lookahead.Equals("func") || lookahead.Equals("impl") || lookahead.Equals("struct"))
             {
                 if (PushInStack("epsilon") && REPTPROG0() && PopFromStackUntilEpsilon("STRUCTORIMPLORFUNCLIST"))
-                writeOutDerivation("PROG -> REPTPROG0");
+                    writeOutDerivation("PROG -> REPTPROG0");
                 else
                     error = true;
             }
@@ -1250,12 +1250,12 @@ namespace LexDriver
             if (lookahead.Equals("func") || lookahead.Equals("impl") || lookahead.Equals("struct"))
             {
                 if (STRUCTORIMPLORFUNC() && REPTPROG0())
-                writeOutDerivation("REPTPROG0 -> STRUCTORIMPLORFUNC REPTPROG0");
+                    writeOutDerivation("REPTPROG0 -> STRUCTORIMPLORFUNC REPTPROG0");
                 else
                     error = true;
             }
             else if (lookahead.Equals("$"))
-            writeOutDerivation("REPTPROG0 -> epsilon");
+                writeOutDerivation("REPTPROG0 -> epsilon");
 
             else
                 error = true;
@@ -1272,7 +1272,7 @@ namespace LexDriver
             if (lookahead.Equals("intnum") || lookahead.Equals("floatnum") || lookahead.Equals("openpar") || lookahead.Equals("not") || lookahead.Equals("id") || lookahead.Equals("plus") || lookahead.Equals("minus"))
             {
                 if (ARITHEXPR() && RELOP() && ARITHEXPR() && PopFromStack("relExpr", 3))
-                writeOutDerivation("RELEXPR -> ARITHEXPR RELOP ARITHEXPR");
+                    writeOutDerivation("RELEXPR -> ARITHEXPR RELOP ARITHEXPR");
                 else
                     error = true;
             }
@@ -1291,7 +1291,7 @@ namespace LexDriver
             if (lookahead.Equals("eq"))
             {
                 if (Match("eq") && PushInStack("relOp"))
-                writeOutDerivation("RELOP -> eq");
+                    writeOutDerivation("RELOP -> eq");
 
                 else
                     error = true;
@@ -1299,7 +1299,7 @@ namespace LexDriver
             else if (lookahead.Equals("neq"))
             {
                 if (Match("neq") && PushInStack("relOp"))
-                writeOutDerivation("RELOP -> neq");
+                    writeOutDerivation("RELOP -> neq");
 
                 else
                     error = true;
@@ -1307,7 +1307,7 @@ namespace LexDriver
             else if (lookahead.Equals("lt"))
             {
                 if (Match("lt") && PushInStack("relOp"))
-                writeOutDerivation("RELOP -> lt");
+                    writeOutDerivation("RELOP -> lt");
 
                 else
                     error = true;
@@ -1315,7 +1315,7 @@ namespace LexDriver
             else if (lookahead.Equals("gt"))
             {
                 if (Match("gt") && PushInStack("relOp"))
-                writeOutDerivation("RELOP -> gt");
+                    writeOutDerivation("RELOP -> gt");
 
                 else
                     error = true;
@@ -1323,7 +1323,7 @@ namespace LexDriver
             else if (lookahead.Equals("leq"))
             {
                 if (Match("leq") && PushInStack("relOp"))
-                writeOutDerivation("RELOP -> leq");
+                    writeOutDerivation("RELOP -> leq");
 
                 else
                     error = true;
@@ -1331,7 +1331,7 @@ namespace LexDriver
             else if (lookahead.Equals("geq"))
             {
                 if (Match("geq") && PushInStack("relOp"))
-                writeOutDerivation("RELOP -> geq");
+                    writeOutDerivation("RELOP -> geq");
                 else
                     error = true;
             }
@@ -1351,14 +1351,14 @@ namespace LexDriver
             if (lookahead.Equals("void"))
             {
                 if (Match("void") && PushInStack("type"))
-                writeOutDerivation("RETURNTYPE -> void");
+                    writeOutDerivation("RETURNTYPE -> void");
                 else
                     error = true;
             }
             else if (lookahead.Equals("integer") || lookahead.Equals("float") || lookahead.Equals("id"))
             {
                 if (TYPE())
-                writeOutDerivation("RETURNTYPE -> TYPE");
+                    writeOutDerivation("RETURNTYPE -> TYPE");
                 else
                     error = true;
             }
@@ -1377,14 +1377,14 @@ namespace LexDriver
             if (lookahead.Equals("plus"))
             {
                 if (Match("plus"))
-                writeOutDerivation("SIGN -> plus");
+                    writeOutDerivation("SIGN -> plus");
                 else
                     error = true;
             }
             else if (lookahead.Equals("minus"))
             {
                 if (Match("minus"))
-                writeOutDerivation("SIGN -> minus");
+                    writeOutDerivation("SIGN -> minus");
                 else
                     error = true;
             }
@@ -1403,54 +1403,54 @@ namespace LexDriver
             if (lookahead.Equals("id"))
             {
                 if (STATEMENT())
-                writeOutDerivation("STATBLOCK -> STATEMENT");
+                    writeOutDerivation("STATBLOCK -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("opencubr"))
             {
                 if (Match("opencubr") && REPTSTATBLOCK1() && Match("closecubr"))
-                writeOutDerivation("STATBLOCK -> lcurbr REPTSTATBLOCK1 rcurbr");
+                    writeOutDerivation("STATBLOCK -> lcurbr REPTSTATBLOCK1 rcurbr");
                 else
                     error = true;
             }
             else if (lookahead.Equals("return"))
             {
                 if (STATEMENT())
-                writeOutDerivation("STATBLOCK -> STATEMENT");
+                    writeOutDerivation("STATBLOCK -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("while"))
             {
                 if (STATEMENT())
-                writeOutDerivation("STATBLOCK -> STATEMENT");
+                    writeOutDerivation("STATBLOCK -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("read"))
             {
                 if (STATEMENT())
-                writeOutDerivation("STATBLOCK -> STATEMENT");
+                    writeOutDerivation("STATBLOCK -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("write"))
             {
                 if (STATEMENT())
-                writeOutDerivation("STATBLOCK -> STATEMENT");
+                    writeOutDerivation("STATBLOCK -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("if"))
             {
                 if (STATEMENT())
-                writeOutDerivation("STATBLOCK -> STATEMENT");
+                    writeOutDerivation("STATBLOCK -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("else") || lookahead.Equals("semi"))
-            writeOutDerivation("STATBLOCK -> epsilon");
+                writeOutDerivation("STATBLOCK -> epsilon");
             else
                 error = true;
 
@@ -1466,7 +1466,7 @@ namespace LexDriver
             if (lookahead.Equals("id"))
             {
                 if (PushInStack("epsilon") && REPTVARIABLE0() && PushInStack("id") && PopFromStackUntilEpsilon("var0") && STATEMENTDASH())
-                writeOutDerivation("STATEMENT -> REPTVARIABLE0 id STATEMENTDASH");
+                    writeOutDerivation("STATEMENT -> REPTVARIABLE0 id STATEMENTDASH");
                 else
                     error = true;
             }
@@ -1474,7 +1474,7 @@ namespace LexDriver
             else if (lookahead.Equals("return"))
             {
                 if (Match("return") && Match("openpar") && EXPR() && Match("closepar") && Match("semi") && PopFromStack("returnStatement", 1))
-                writeOutDerivation("STATEMENT -> return lpar EXPR rpar semi");
+                    writeOutDerivation("STATEMENT -> return lpar EXPR rpar semi");
                 else
                     error = true;
             }
@@ -1482,7 +1482,7 @@ namespace LexDriver
             else if (lookahead.Equals("write"))
             {
                 if (Match("write") && Match("openpar") && EXPR() && Match("closepar") && Match("semi") && PopFromStack("writeStatement", 1))
-                writeOutDerivation("STATEMENT -> write lpar EXPR rpar semi");
+                    writeOutDerivation("STATEMENT -> write lpar EXPR rpar semi");
                 else
                     error = true;
             }
@@ -1490,7 +1490,7 @@ namespace LexDriver
             else if (lookahead.Equals("read"))
             {
                 if (Match("read") && Match("openpar") && VARIABLE() && Match("closepar") && Match("semi") && PopFromStack("readStatement", 1))
-                writeOutDerivation("STATEMENT -> read lpar VARIABLE rpar semi");
+                    writeOutDerivation("STATEMENT -> read lpar VARIABLE rpar semi");
                 else
                     error = true;
             }
@@ -1498,7 +1498,7 @@ namespace LexDriver
             else if (lookahead.Equals("while"))
             {
                 if (Match("while") && Match("openpar") && RELEXPR() && Match("closepar") && PushInStack("epsilon") && STATBLOCK() && PopFromStackUntilEpsilon("statementBlock") && Match("semi") && PopFromStack("whileStatement", 2))
-                writeOutDerivation("STATEMENT -> while lpar RELEXPR rpar STATBLOCK semi");
+                    writeOutDerivation("STATEMENT -> while lpar RELEXPR rpar STATBLOCK semi");
                 else
                     error = true;
             }
@@ -1506,7 +1506,7 @@ namespace LexDriver
             else if (lookahead.Equals("if"))
             {
                 if (Match("if") && Match("openpar") && RELEXPR() && Match("closepar") && Match("then") && PushInStack("epsilon") && STATBLOCK() && PopFromStackUntilEpsilon("statementBlock") && Match("else") && PushInStack("epsilon") && STATBLOCK() && PopFromStackUntilEpsilon("statementBlock") && Match("semi") && PopFromStack("ifStatement", 3))
-                writeOutDerivation("STATEMENT -> if lpar RELEXPR rpar then STATBLOCK else STATBLOCK semi");
+                    writeOutDerivation("STATEMENT -> if lpar RELEXPR rpar then STATBLOCK else STATBLOCK semi");
                 else
                     error = true;
             }
@@ -1526,21 +1526,21 @@ namespace LexDriver
             if (lookahead.Equals("openpar"))
             {
                 if (Match("openpar") && PushInStack("epsilon") && APARAMS() && PopFromStackUntilEpsilon("aParams") && Match("closepar") && Match("semi") && PopFromStack("fcallStatement", 2))
-                writeOutDerivation("STATEMENTDASH -> lpar APARAMS rpar semi");
+                    writeOutDerivation("STATEMENTDASH -> lpar APARAMS rpar semi");
                 else
                     error = true;
             }
             else if (lookahead.Equals("opensqbr"))
             {
                 if (PushInStack("epsilon") && REPTVARIABLE2() && PopFromStackUntilEpsilon("indiceList") && PopFromStack("var", 2) && ASSIGNOP() && EXPR() && Match("semi") && PopFromStack("assignStatement", 2))
-                writeOutDerivation("STATEMENTDASH -> REPTVARIABLE2 ASSIGNOP EXPR semi");
+                    writeOutDerivation("STATEMENTDASH -> REPTVARIABLE2 ASSIGNOP EXPR semi");
                 else
                     error = true;
             }
             else if (lookahead.Equals("assign"))
             {
                 if (PushInStack("epsilon") && REPTVARIABLE2() && PopFromStackUntilEpsilon("indiceList") && PopFromStack("var", 2) && ASSIGNOP() && EXPR() && Match("semi") && PopFromStack("assignStatement", 2))
-                writeOutDerivation("STATEMENTDASH -> REPTVARIABLE2 ASSIGNOP EXPR semi");
+                    writeOutDerivation("STATEMENTDASH -> REPTVARIABLE2 ASSIGNOP EXPR semi");
                 else
                     error = true;
             }
@@ -1559,7 +1559,7 @@ namespace LexDriver
             if (lookahead.Equals("struct"))
             {
                 if (Match("struct") && Match("id") && PushInStack("id") && PushInStack("epsilon") && optstructDecl2() && PopFromStackUntilEpsilon("inheritList") && Match("opencubr") && PushInStack("epsilon") && REPTSTRUCTDECL4() && PopFromStackUntilEpsilon("memberList") && Match("closecubr") && Match("semi"))
-                writeOutDerivation("STRUCTDECL -> struct id OPTSTRUCTDECL2 lcurbr REPTSTRUCTDECL4 rcurbr semi");
+                    writeOutDerivation("STRUCTDECL -> struct id OPTSTRUCTDECL2 lcurbr REPTSTRUCTDECL4 rcurbr semi");
 
                 else
                     error = true;
@@ -1579,7 +1579,7 @@ namespace LexDriver
             if (lookahead.Equals("func"))
             {
                 if (FUNCDEF() && PopFromStack("funcDef", 4))
-                writeOutDerivation("STRUCTORIMPLORFUNC -> FUNCDEF");
+                    writeOutDerivation("STRUCTORIMPLORFUNC -> FUNCDEF");
 
                 else
                     error = true;
@@ -1596,7 +1596,7 @@ namespace LexDriver
             else if (lookahead.Equals("struct"))
             {
                 if (STRUCTDECL() && PopFromStack("structDecl", 3))
-                writeOutDerivation("STRUCTORIMPLORFUNC -> STRUCTDECL");
+                    writeOutDerivation("STRUCTORIMPLORFUNC -> STRUCTDECL");
                 else
                     error = true;
             }
@@ -1615,7 +1615,7 @@ namespace LexDriver
             if (lookahead.Equals("intnum") || lookahead.Equals("floatnum") || lookahead.Equals("openpar") || lookahead.Equals("not") || lookahead.Equals("id") || lookahead.Equals("plus") || lookahead.Equals("minus"))
             {
                 if (FACTOR() && RIGHTRECTERM())
-                writeOutDerivation("TERM -> FACTOR RIGHTRECTERM");
+                    writeOutDerivation("TERM -> FACTOR RIGHTRECTERM");
                 else
                     error = true;
             }
@@ -1635,21 +1635,21 @@ namespace LexDriver
             if (lookahead.Equals("integer"))
             {
                 if (Match("integer") && PushInStack("type"))
-                writeOutDerivation("TYPE -> integer");
+                    writeOutDerivation("TYPE -> integer");
                 else
                     error = true;
             }
             else if (lookahead.Equals("float"))
             {
                 if (Match("float") && PushInStack("type"))
-                writeOutDerivation("TYPE -> float");
+                    writeOutDerivation("TYPE -> float");
                 else
                     error = true;
             }
             else if (lookahead.Equals("id"))
             {
                 if (Match("id") && PushInStack("type"))
-                writeOutDerivation("TYPE -> id");
+                    writeOutDerivation("TYPE -> id");
                 else
                     error = true;
             }
@@ -1668,7 +1668,7 @@ namespace LexDriver
             if (lookahead.Equals("let"))
             {
                 if (Match("let") && Match("id") && PushInStack("id") && Match("colon") && TYPE() && PushInStack("epsilon") && REPTVARDECL4() && PopFromStackUntilEpsilon("dimList") && Match("semi"))
-                writeOutDerivation("VARDECL -> let id colon TYPE REPTVARDECL4 semi");
+                    writeOutDerivation("VARDECL -> let id colon TYPE REPTVARDECL4 semi");
                 else
                     error = true;
             }
@@ -1687,49 +1687,49 @@ namespace LexDriver
             if (lookahead.Equals("id"))
             {
                 if (STATEMENT())
-                writeOutDerivation("VARDECLORSTAT -> STATEMENT");
+                    writeOutDerivation("VARDECLORSTAT -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("let"))
             {
                 if (VARDECL())
-                writeOutDerivation("VARDECLORSTAT -> VARDECL");
+                    writeOutDerivation("VARDECLORSTAT -> VARDECL");
                 else
                     error = true;
             }
             else if (lookahead.Equals("return"))
             {
                 if (STATEMENT())
-                writeOutDerivation("VARDECLORSTAT -> STATEMENT");
+                    writeOutDerivation("VARDECLORSTAT -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("write"))
             {
                 if (STATEMENT())
-                writeOutDerivation("VARDECLORSTAT -> STATEMENT");
+                    writeOutDerivation("VARDECLORSTAT -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("read"))
             {
                 if (STATEMENT())
-                writeOutDerivation("VARDECLORSTAT -> STATEMENT");
+                    writeOutDerivation("VARDECLORSTAT -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("while"))
             {
                 if (STATEMENT())
-                writeOutDerivation("VARDECLORSTAT -> STATEMENT");
+                    writeOutDerivation("VARDECLORSTAT -> STATEMENT");
                 else
                     error = true;
             }
             else if (lookahead.Equals("if"))
             {
                 if (STATEMENT())
-                writeOutDerivation("VARDECLORSTAT -> STATEMENT");
+                    writeOutDerivation("VARDECLORSTAT -> STATEMENT");
                 else
                     error = true;
             }
@@ -1749,7 +1749,7 @@ namespace LexDriver
             if (lookahead.Equals("id"))
             {
                 if (PushInStack("epsilon") && PushInStack("epsilon") && REPTVARIABLE0() && PushInStack("id") && PopFromStackUntilEpsilon("var0") && PushInStack("epsilon") && REPTVARIABLE2() && PopFromStackUntilEpsilon("indiceList") && PopFromStackUntilEpsilon("variable"))
-                writeOutDerivation("VARIABLE -> REPTVARIABLE0 id REPTVARIABLE2");
+                    writeOutDerivation("VARIABLE -> REPTVARIABLE0 id REPTVARIABLE2");
                 else
                     error = true;
             }
@@ -1769,14 +1769,14 @@ namespace LexDriver
             if (lookahead.Equals("public"))
             {
                 if (Match("public"))
-                writeOutDerivation("VISIBILITY -> public");
+                    writeOutDerivation("VISIBILITY -> public");
                 else
                     error = true;
             }
             else if (lookahead.Equals("private"))
             {
                 if (Match("private"))
-                writeOutDerivation("VISIBILITY -> private");
+                    writeOutDerivation("VISIBILITY -> private");
                 else
                     error = true;
             }

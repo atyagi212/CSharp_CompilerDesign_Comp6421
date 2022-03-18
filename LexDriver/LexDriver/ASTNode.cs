@@ -15,6 +15,7 @@ namespace LexDriver
         public List<ASTNode> Children { get; set; }
         public DataTable m_symtab { get; set; }
         public SymbolEntry entry { get; set; }
+        public int line = -1;
 
         public ASTNode(string label)
         {
@@ -22,8 +23,9 @@ namespace LexDriver
             this.value = null;
             Children = new List<ASTNode>();
         }
-        public ASTNode(string label, string value)
+        public ASTNode(string label, string value,int line)
         {
+            this.line = line;
             this.label = label;
             this.value = value;
             Children = new List<ASTNode>();

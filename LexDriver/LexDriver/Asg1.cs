@@ -68,6 +68,7 @@ namespace LexDriver
                     string fileExt = Path.GetExtension(file.FullName);
                     string filename = Path.GetFileNameWithoutExtension(file.Name);
                     ASTNode node = new ASTNode();
+                    ASTNode symTableNodes = new ASTNode();
                     if (fileExt == ".outlextokens")
                     {
                         Console.WriteLine("Processing File: " + filename);
@@ -106,10 +107,23 @@ namespace LexDriver
                         {
                             if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".outsymboltables")))
                                 using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".outsymboltables"))) ;
-                            SymbolTableGenerator STCVisitor3 = new SymbolTableGenerator(filename);
+                            SymbolTableGenerator STCVisitor = new SymbolTableGenerator(filename);
                             File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".outsymboltables"), "| table: global\n");
                             File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".outsymboltables"), "===================================================================================\n");
-                            STCVisitor3.PrintTable(node);
+                            symTableNodes = STCVisitor.PrintTable(node);
+                        }
+                        catch (IOException e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
+                        Console.WriteLine("=====================\n\n");
+
+                        try
+                        {
+                            if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".outsemanticerrors")))
+                                using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".outsemanticerrors"))) ;
+                            SemanticErrorVisitor SEVisitor = new SemanticErrorVisitor(filename);
+                            SEVisitor.PrintSemanticErrors(symTableNodes);
                         }
                         catch (IOException e)
                         {
