@@ -112,7 +112,7 @@ namespace LexDriver
                 }
                 else if (paramCount.Count == 0 && varCount.Count == 0)
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple declaration of parameter: at line " + variableName.line + "\n");
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable: at line " + variableName.line + "\n");
                     return string.Empty;
                 }
                 else

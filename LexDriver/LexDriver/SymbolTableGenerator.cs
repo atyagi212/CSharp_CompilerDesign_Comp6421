@@ -6,11 +6,11 @@ using System.Reflection;
 
 namespace LexDriver
 {
-    public class SymbolTableGenerator : Visitor
+    public class SymbolTableGeneratorVisitor : Visitor
     {
         private string fileName;
 
-        public SymbolTableGenerator(string outputfilename)
+        public SymbolTableGeneratorVisitor(string outputfilename)
         {
             this.fileName = outputfilename;
         }

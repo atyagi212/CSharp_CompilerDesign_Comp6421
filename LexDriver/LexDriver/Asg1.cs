@@ -107,7 +107,7 @@ namespace LexDriver
                         {
                             if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".outsymboltables")))
                                 using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".outsymboltables"))) ;
-                            SymbolTableGenerator STCVisitor = new SymbolTableGenerator(filename);
+                            SymbolTableGeneratorVisitor STCVisitor = new SymbolTableGeneratorVisitor(filename);
                             File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".outsymboltables"), "| table: global\n");
                             File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".outsymboltables"), "===================================================================================\n");
                             symTableNodes = STCVisitor.PrintTable(node);
