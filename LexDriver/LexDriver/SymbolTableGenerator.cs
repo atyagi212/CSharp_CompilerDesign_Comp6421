@@ -459,10 +459,6 @@ namespace LexDriver
             foreach (Node node in p_Node.Children) { node.Accept(this); }
         }
 
-        public override void visit(FunctionCallDataMemberNode p_Node)
-        {
-            foreach (Node node in p_Node.Children) { node.Accept(this); }
-        }
 
         public override void visit(AParamsNode p_Node)
         {

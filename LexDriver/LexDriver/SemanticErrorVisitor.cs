@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.IO;
+using System.Linq;
 
 namespace LexDriver
 {
@@ -40,17 +41,124 @@ namespace LexDriver
         private void CheckForAssignmentErrors(ASTNode p_Node, List<ASTNode> allNodes, ASTNode rootNode)
         {
             DataTable dt = new DataTable();
-            var variableName = p_Node.Children.Find(x => x.label == "var").Children.Find(y => y.label == "var0").Children.Find(z => z.label == "id").value;
+            string rightSideOutputType = string.Empty;
+            string leftSideOutputType = string.Empty;
+            var isComplexVar = p_Node.Children.Find(x => x.label == "var").Children.Find(y => y.label == "var0").Children.Find(z => z.label == "dot");
+            var isArrayVar = p_Node.Children.Find(x => x.label == "var").Children.Find(y => y.label == "indiceList").Children;
+            var variableName = p_Node.Children.Find(x => x.label == "var").Children.Find(y => y.label == "var0").Children.Find(z => z.label == "id");
             dt = rootNode.m_symtab;
-            var parentClass = dt.AsEnumerable().Where(x => x.Field<string>("ParentClass") != string.Empty);
+            var parentClass = dt.AsEnumerable().Where(x => x.Field<string>("ParentClass") != string.Empty && x.Field<string>("ParentClass") != null).ToList();
+            var rightSideNode = p_Node.Children[0].label;
+            switch (rightSideNode)
+            {
+                case "intlit":
+                    rightSideOutputType = "integer";
+                    break;
+                case "functionCallDataMember":
+                    rightSideOutputType = GetOutputFCallDMemberType(p_Node, parentClass, allNodes, rootNode);
+                    break;
+
+                case "floatnum":
+                    rightSideOutputType = "float";
+                    break;
+
+            }
+            //if (isComplexVar != null)
+            //    leftSideOutputType = GetComplexVarType(p_Node, parentClass, allNodes, rootNode);
+
+            //if (isArrayVar.Children.Count>0)
+            //    leftSideOutputType = GetArrayVarType(p_Node, parentClass, allNodes, rootNode);
+
+            if (variableName != null && isComplexVar == null && isArrayVar.Count == 0)
+                leftSideOutputType = GetVarType(variableName, parentClass, allNodes, rootNode);
+            if (leftSideOutputType.Contains("[]"))
+                leftSideOutputType = leftSideOutputType.Split('[')[0];
+
+
             if (parentClass == null)
             {
-                var localorGlobal = dt.AsEnumerable().Where(x => x.Field<string>("ParameterName") == variableName || x.Field<string>("VariableName") == variableName);
+                var localorGlobal = dt.AsEnumerable().Where(x => x.Field<string>("ParameterName") == variableName.value || x.Field<string>("VariableName") == variableName.value);
                 if (localorGlobal == null)
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable \n");
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable: at line " + variableName.line + "\n");
                 }
             }
+
+            if (!string.IsNullOrEmpty(leftSideOutputType) && !string.IsNullOrEmpty(rightSideOutputType) && leftSideOutputType != rightSideOutputType)
+            {
+                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable: at line " + variableName.line + "\n");
+            }
+        }
+
+        private string GetVarType(ASTNode variableName, List<DataRow> parentClass, List<ASTNode> allNodes, ASTNode rootNode)
+        {
+            if (parentClass.Count == 0)
+            {
+                var paramCount = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") == variableName.value).Select(y => y.Field<string>("ParameterType")).ToList();
+                var varCount = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == variableName.value).Select(y => y.Field<string>("VariableType")).ToList();
+
+                if (paramCount.Count > 0 && varCount.Count > 0)
+                {
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple declaration of parameter: at line " + rootNode.line + "\n");
+                    return string.Empty;
+                }
+                else if (paramCount.Count == 0 && varCount.Count > 0)
+                {
+                    return varCount[0].ToString();
+                }
+                else if (paramCount.Count > 0 && varCount.Count == 0)
+                {
+                    return paramCount[0].ToString();
+                }
+                else if (paramCount.Count == 0 && varCount.Count == 0)
+                {
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple declaration of parameter: at line " + variableName.line + "\n");
+                    return string.Empty;
+                }
+                else
+                    return string.Empty;
+
+            }
+            else
+            {
+                return string.Empty;
+            }
+        }
+
+        private string GetArrayVarType(ASTNode p_Node, EnumerableRowCollection<DataRow> parentClass, List<ASTNode> allNodes, ASTNode rootNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetComplexVarType(ASTNode p_Node, EnumerableRowCollection<DataRow> parentClass, List<ASTNode> allNodes, ASTNode rootNode)
+        {
+            throw new NotImplementedException();
+        }
+
+        private string GetOutputFCallDMemberType(ASTNode p_Node, List<DataRow> parentClass, List<ASTNode> allNodes, ASTNode rootNode)
+        {
+            var funcdatamemberNode = p_Node.Children[0];
+            if (funcdatamemberNode.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "dot") == null)
+            {
+                var variable = funcdatamemberNode.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "id").value;
+                if (parentClass.Count == 0)
+                {
+                    var row = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == variable || x.Field<string>("ParameterName") == variable).ToList();
+                    if (row.Count > 0)
+                    {
+                        if (!string.IsNullOrEmpty(row[0]["VariableType"].ToString()))
+                            return row[0]["VariableType"].ToString();
+                        else
+                            return row[0]["ParameterType"].ToString();
+                    }
+                }
+            }
+            return string.Empty;
+        }
+
+        private string GetOutputExprType(ASTNode p_Node, EnumerableRowCollection<DataRow> parentClass, List<ASTNode> allNodes, ASTNode rootNode)
+        {
+            throw new NotImplementedException();
         }
 
         private void CheckForUndefinedErrors(ASTNode p_Node, List<ASTNode> allNodes, ASTNode rootNode)
@@ -67,7 +175,7 @@ namespace LexDriver
                         nameMatch = true;
                 }
                 if (!nameMatch)
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared free function: at line "+functionCallName.line+" \n");
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared free function: at line " + functionCallName.line + " \n");
             }
 
 
@@ -76,6 +184,7 @@ namespace LexDriver
         private void FindFunctionErrors(ASTNode node, List<ASTNode> allNodes, ASTNode rootNode)
         {
             var StatementBlockNode = node.Children.Find(x => x.label == "statementBlock");
+            CheckFunctionGlobalErrors(node);
             foreach (ASTNode child in StatementBlockNode.Children)
             {
 
@@ -86,6 +195,29 @@ namespace LexDriver
                 if (child.label == "fcallStatement")
                 {
                     CheckForUndefinedErrors(child, allNodes, rootNode);
+                }
+            }
+        }
+
+        private void CheckFunctionGlobalErrors(ASTNode node)
+        {
+            var GroupByParam = node.m_symtab.AsEnumerable().GroupBy(e => e.Field<string>("ParameterName")).Select(d => new { d.Key, Count = d.Count() }).ToList();
+            var GroupByVar = node.m_symtab.AsEnumerable().GroupBy(e => e.Field<string>("VariableName")).Select(d => new { d.Key, Count = d.Count() }).ToList();
+
+            if (GroupByParam.Count > 0)
+            {
+                var result = GroupByParam.Where(x => x.Count > 1 && x.Key != string.Empty && x.Key != null).Select(y => y.Key).ToList();
+                if (result.Count > 0)
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple same name parameters: at line " + node.line + "\n");
+            }
+
+            if (GroupByVar.Count > 0)
+            {
+                var result = GroupByVar.Where(x => x.Count > 1 && x.Key != string.Empty && x.Key != null).Select(y => y.Key).ToList();
+                foreach (var item in result)
+                {
+                    var lineNumber = node.Children.Find(x => x.label == "statementBlock").Children.FindAll(y => y.label == "id").Find(z => z.value == item.ToString()).line;
+                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple same name variables: at line " + lineNumber + "\n");
                 }
             }
         }
@@ -306,10 +438,6 @@ namespace LexDriver
             throw new NotImplementedException();
         }
 
-        public override void visit(FunctionCallDataMemberNode p_Node)
-        {
-            throw new NotImplementedException();
-        }
 
         public override void visit(AParamsNode p_Node)
         {

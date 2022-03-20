@@ -35,7 +35,6 @@
         public abstract void visit(StructDeclNode p_Node);
         public abstract void visit(DimListNode p_Node);
         public abstract void visit(Var0Node p_Node);
-        public abstract void visit(FunctionCallDataMemberNode p_Node);
         public abstract void visit(AParamsNode p_Node);
         public abstract void visit(IndiceListNode p_Node);
         public abstract void visit(StatementBlockNode p_Node);

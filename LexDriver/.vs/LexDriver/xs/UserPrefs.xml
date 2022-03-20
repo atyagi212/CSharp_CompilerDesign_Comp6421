@@ -2,25 +2,30 @@
   <MonoDevelop.Ide.Workbench ActiveDocument="LexDriver/OutputFiles/polynomialsemanticerrors.outsemanticerrors">
     <Files>
       <File FileName="LexDriver/Asg1.cs" Line="122" Column="1" />
-      <File FileName="LexDriver/SymbolTableGenerator.cs" Line="19" Column="1" />
-      <File FileName="LexDriver/SemanticErrorVisitor.cs" Line="71" Column="1" />
-      <File FileName="LexDriver/SymbolEntry.cs" Line="14" Column="35" />
+      <File FileName="LexDriver/SymbolTableGenerator.cs" Line="286" Column="1" />
+      <File FileName="LexDriver/SemanticErrorVisitor.cs" Line="189" Column="1" />
+      <File FileName="LexDriver/SymbolEntry.cs" Line="15" Column="35" />
       <File FileName="LexDriver/ASTNode.cs" Line="18" Column="15" />
-      <File FileName="LexDriver/SyntaxAnalysis.cs" Line="69" Column="233" />
-      <File FileName="LexDriver/OutputFiles/polynomialsemanticerrors.outsymboltables" Line="1" Column="1" />
+      <File FileName="LexDriver/SyntaxAnalysis.cs" Line="117" Column="1" />
+      <File FileName="LexDriver/Visitor.cs" Line="37" Column="53" />
       <File FileName="LexDriver/OutputFiles/polynomialsemanticerrors.outsemanticerrors" Line="1" Column="1" />
     </Files>
     <Pads>
       <Pad Id="ProjectPad">
         <State name="__root__">
           <Node name="LexDriver" expanded="True">
-            <Node name="LexDriver" expanded="True" />
+            <Node name="LexDriver" expanded="True">
+              <Node name="OutputFiles" expanded="True" />
+              <Node name="SemanticErrorVisitor.cs" selected="True" />
+            </Node>
           </Node>
         </State>
       </Pad>
       <Pad Id="MonoDevelop.Debugger.WatchPad">
         <State>
-          <Value>p_Node</Value>
+          <Value>GroupByVar.ToList().Where(x=&gt;x.Count&gt;1).Select(y=&gt;y.Key)</Value>
+          <Value>GroupByParam</Value>
+          <Value>(DataRow)varCount[0]["Type"]</Value>
         </State>
       </Pad>
     </Pads>
@@ -32,15 +37,17 @@
     <BreakpointStore>
       <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="9" column="9" />
       <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="404" column="25" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="17" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="18" column="9" />
       <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="122" column="25" />
       <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/Asg1.cs" relfile="LexDriver/Asg1.cs" line="127" column="25" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="77" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="41" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="57" column="9" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="71" column="13" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="80" column="13" />
-      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="70" column="21" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="185" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="42" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="139" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="94" column="9" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="83" column="21" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="89" column="17" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="178" column="21" />
+      <Breakpoint file="/Users/akshattyagi/Downloads/LexDriver/LexDriver/SemanticErrorVisitor.cs" relfile="LexDriver/SemanticErrorVisitor.cs" line="189" column="13" />
     </BreakpointStore>
   </MonoDevelop.Ide.DebuggingService.Breakpoints>
   <MultiItemStartupConfigurations />
