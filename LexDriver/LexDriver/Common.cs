@@ -17,5 +17,8 @@ namespace LexDriver
         internal static string tokenContent;
         public static string[] arrString;
         public static List<string> lstIgnoreToken = new List<string> { "inlinecmt", "blockcmt" };
+
+        public static Dictionary<string, int> dictMemSize = new Dictionary<string, int>() { { "integer", 4 }, { "float", 8 } };
+        public static Dictionary<string, string> dictOprName = new Dictionary<string, string>() { { "+", "add" }, { "-", "sub" }, { "*", "mul" }, { "/", "div" } };
     }
 }

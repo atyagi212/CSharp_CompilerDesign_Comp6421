@@ -130,7 +130,7 @@ namespace LexDriver
                     }
                     else
                     {
-                        ReadCharcter(); return new Token("div", "/", line);
+                        return new Token("div", "/", line);
                     }
                 case '(':
                     ReadCharcter(); return new Token("openpar", "(", line);

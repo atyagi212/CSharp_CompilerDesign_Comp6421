@@ -15,7 +15,7 @@ namespace LexDriver
         Token token = null;
         private string fileName = string.Empty;
 
-        Node root = null;
+        public Node root = null;
         public static Stack<ASTNode> st = new Stack<ASTNode>();
         Token prevToken = null;
 
@@ -378,21 +378,21 @@ namespace LexDriver
             bool error = false;
             if (lookahead.Equals("plus"))
             {
-                if (Match("plus"))
+                if (Match("plus") && PushInStack("opr"))
                     writeOutDerivation("AddOP -> plus");
                 else
                     error = true;
             }
             else if (lookahead.Equals("minus"))
             {
-                if (Match("minus"))
+                if (Match("minus") && PushInStack("opr"))
                     writeOutDerivation("AddOP -> minus");
                 else
                     error = true;
             }
             else if (lookahead.Equals("or"))
             {
-                if (Match("or"))
+                if (Match("or") && PushInStack("opr"))
                     writeOutDerivation("AddOP -> or");
                 else
                     error = true;
@@ -432,7 +432,7 @@ namespace LexDriver
             bool error = false;
             if (lookahead.Equals("plus") || lookahead.Equals("minus") || lookahead.Equals("or"))
             {
-                if (AddOP() && TERM() && PopFromStack("addOp", 2) && RIGHTRECARITHEXPR())
+                if (AddOP() && TERM() && PopFromStack("addOp", 3) && RIGHTRECARITHEXPR())
                     writeOutDerivation("RIGHTRECARITHEXPR -> AddOP TERM RIGHTRECARITHEXPR");
                 else
                     error = true;
@@ -453,7 +453,7 @@ namespace LexDriver
             bool error = false;
             if (lookahead.Equals("mult") || lookahead.Equals("div") || lookahead.Equals("and"))
             {
-                if (MULTOP() && FACTOR() && PopFromStack("multOp", 2) && RIGHTRECTERM())
+                if (MULTOP() && FACTOR() && PopFromStack("multOp", 3) && RIGHTRECTERM())
                     writeOutDerivation("RIGHTRECTERM -> MULTOP FACTOR RIGHTRECTERM");
                 else
                     error = true;
@@ -1152,21 +1152,21 @@ namespace LexDriver
             bool error = false;
             if (lookahead.Equals("mult"))
             {
-                if (Match("mult"))
+                if (Match("mult") && PushInStack("opr"))
                     writeOutDerivation("MULTOP -> mult");
                 else
                     error = true;
             }
             else if (lookahead.Equals("div"))
             {
-                if (Match("div"))
+                if (Match("div") && PushInStack("opr"))
                     writeOutDerivation("MULTOP -> div");
                 else
                     error = true;
             }
             else if (lookahead.Equals("and"))
             {
-                if (Match("and"))
+                if (Match("and") && PushInStack("opr"))
                     writeOutDerivation("MULTOP -> and");
                 else
                     error = true;
@@ -1693,7 +1693,7 @@ namespace LexDriver
             }
             else if (lookahead.Equals("let"))
             {
-                if (VARDECL())
+                if (VARDECL() && PopFromStack("varDecl", 3))
                     writeOutDerivation("VARDECLORSTAT -> VARDECL");
                 else
                     error = true;

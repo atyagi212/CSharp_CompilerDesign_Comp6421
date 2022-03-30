@@ -23,7 +23,7 @@ namespace LexDriver
             this.value = null;
             Children = new List<ASTNode>();
         }
-        public ASTNode(string label, string value,int line)
+        public ASTNode(string label, string value, int line)
         {
             this.line = line;
             this.label = label;
@@ -34,6 +34,14 @@ namespace LexDriver
         {
 
         }
-
+        
+    public override string ToString()
+        {
+            return "Node{" +
+                    "label='" + label + '\'' +
+                    ", value='" + value + '\'' +
+                    ", line=" + line +
+                    '}';
+        }
     }
 }

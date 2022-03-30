@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Text;
 
 namespace LexDriver
 {
@@ -130,7 +131,52 @@ namespace LexDriver
                             Console.WriteLine(e.StackTrace);
                         }
                         Console.WriteLine("=====================\n\n");
+
+                        try
+                        {
+                            StringBuilder moonContent = new StringBuilder();
+                            if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".imt")))
+                                using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".imt"))) ;
+                            CodeGenerator codeGenerator = new CodeGenerator(filename);
+                            moonContent= codeGenerator.generate(node);
+                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".imt"), moonContent.ToString());
+
+                        }
+                        catch (IOException e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
+
                     }
+
+                }
+
+                directoryInfo = new DirectoryInfo(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles");
+                arrFiles = directoryInfo.GetFiles();
+
+                foreach (FileInfo file in arrFiles)
+                {
+                    MoonAsmCodeGenerator.arrFileContent = null;
+                    string fileExt = Path.GetExtension(file.FullName);
+                    string filename = Path.GetFileNameWithoutExtension(file.Name);
+                    if (fileExt == ".imt")
+                    {
+                        try
+                        {
+                            MoonAsmCodeGenerator.arrFileContent = File.ReadAllLines(file.FullName);
+                            if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon")))
+                                using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon"))) ;
+                            MoonAsmCodeGenerator moonObj = new MoonAsmCodeGenerator(filename);
+                            moonObj.GenerateAssemblyCode();
+
+                        }
+                        catch (IOException e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
+
+                    }
+
                 }
 
             }
