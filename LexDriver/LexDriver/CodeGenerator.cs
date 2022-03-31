@@ -40,10 +40,12 @@ namespace LexDriver
         {
             string funcName = null;
             List<string> fparamList = null;
+            node.Children.Reverse();
             foreach (ASTNode child in node.Children)
             {
                 if (child.label.Equals("statementBlock"))
                 {
+                    moonContent.Append("\n" + "functionCall# " + funcName + " " + fparamList + "\n");
                     generateStatementBlockCode(child);
                 }
                 else if (child.label.Equals("fparamList"))
@@ -55,7 +57,7 @@ namespace LexDriver
                     funcName = child.value;
                 }
             }
-            moonContent.Insert(0, funcName + " " + fparamList + "\n");
+            moonContent.Append("functionCall# " + funcName + " " + fparamList + "\n");
         }
 
         private List<string> getFparamList(ASTNode node)
@@ -73,7 +75,6 @@ namespace LexDriver
             string id = null;
             string type = null;
             string dimList = null;
-            int memorySize = 0;
             foreach (ASTNode child in node.Children)
             {
                 if (child.label.Equals("dimList"))
@@ -94,7 +95,8 @@ namespace LexDriver
 
         private void generateIfStatementCode(ASTNode node)
         {
-            moonContent.Insert(0, "====generateIfStatementCode====" + "\n");
+            moonContent.Append("generateIfStatementCode" + "\n");
+            node.Children.Reverse();
             foreach (ASTNode child in node.Children)
             {
                 if (child.label.Equals("statementBlock"))
@@ -106,12 +108,12 @@ namespace LexDriver
                     generateRelExprCode(child);
                 }
             }
-            moonContent.Insert(0, "generateIfStatementCode" + "\n");
+            moonContent.Append("=====generateIfStatementCode======" + "\n");
         }
 
         private void generateRelExprCode(ASTNode node)
         {
-            moonContent.Insert(0, "====generateRelExprCode====" + "\n");
+            moonContent.Append("generateRelExprCode" + "\n");
             string var1 = null;
             string var2 = null;
             string relOp = null;
@@ -155,8 +157,8 @@ namespace LexDriver
                     }
                 }
             }
-            moonContent.Insert(0, "assignStatement# " + var2 + " " + relOp + " " + var1 + "\n");
-            moonContent.Insert(0, "generateRelExprCode" + "\n");
+            moonContent.Append("assignStatement# " + var2 + " " + relOp + " " + var1 + "\n");
+            moonContent.Append("====generateRelExprCode=====" + "\n");
         }
 
         private void generateStatementBlockCode(ASTNode pnode)
@@ -212,7 +214,7 @@ namespace LexDriver
                     fcallName = getVar0(child);
                 }
             }
-            moonContent.Insert(0, "funcCall# " + fcallName + " " + aParams + "\n");
+            moonContent.Append("funcCall# " + fcallName + " " + aParams + "\n");
         }
 
         private List<string> getAParams(ASTNode node)
@@ -234,8 +236,8 @@ namespace LexDriver
 
         private void generateWhileStatementCode(ASTNode node)
         {
-            moonContent.Insert(0, "====generateWhileStatementCode====" + "\n");
-
+            moonContent.Append("generateWhileStatementCode" + "\n");
+            node.Children.Reverse();
             foreach (ASTNode child in node.Children)
             {
                 if (child.label.Equals("relExpr"))
@@ -248,7 +250,7 @@ namespace LexDriver
                 }
 
             }
-            moonContent.Insert(0, "generateWhileStatementCode" + "\n");
+            moonContent.Append("=====generateWhileStatementCode=====" + "\n");
         }
 
         private void generateAssignStatementCode(ASTNode node)
@@ -363,7 +365,7 @@ namespace LexDriver
                 }
             }
 
-            moonContent.Insert(0, "varDeclare# " + type + " " + id + dimList + "\n");
+            moonContent.Append("varDeclare# " + type + " " + id + dimList + "\n");
 
         }
 
@@ -381,35 +383,13 @@ namespace LexDriver
 
         private void generateReadStatementCode(ASTNode node)
         {
-            //string result = getVariable(node.Children[0]);
-            //string[] arrindeces = result.Split("][");
-            //if (arrindeces.Length>1)
-            //{
-            //    //PrepareAssemblyArrayCode()
-            //}
-            //else
-            //{
-            //    moonContent.Insert(0, "lw r1," + result + "(r0)" + "\n");
-            //    moonContent.Insert(0, "sw " + result + "(r0)," + result + "r1" + "\n");
-            //}
-            moonContent.Insert(0, "readStatement# " + "read " + getVariable(node.Children[0]) + "\n");
+            moonContent.Append("readStatement# " + "read " + getVariable(node.Children[0]) + "\n");
         }
 
         private void generateWriteStatementCode(ASTNode node)
         {
             //todo expr
-            //string result = getDataMember(node.Children[0]);
-            //string[] arrindeces = result.Split("][");
-            //if (arrindeces.Length > 1)
-            //{
-
-            //}
-            //else
-            //{
-            //    moonContent.Insert(0, "lw r1," + result + "(r0)" + "\n");
-            //}
-
-            moonContent.Insert(0, "writeStatement# " + "write " + getDataMember(node.Children[0]) + "\n");
+            moonContent.Append("writeStatement# " + "write " + getDataMember(node.Children[0]) + "\n");
         }
 
         private string getDataMember(ASTNode node)

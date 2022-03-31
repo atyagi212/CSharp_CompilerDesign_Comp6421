@@ -9,11 +9,13 @@ namespace LexDriver
     {
         public static string[] arrFileContent;
         private string fileName;
+        private string filePath;
         public Dictionary<string, string> VarOrParam;
         public MoonAsmCodeGenerator(string fileName)
         {
             this.fileName = fileName;
             this.VarOrParam = new Dictionary<string, string>();
+            this.filePath = Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon");
         }
 
         public void GenerateAssemblyCode()
@@ -30,8 +32,26 @@ namespace LexDriver
                     case "assignStatement":
                         GetAssignStatementAssembly(item);
                         break;
+
+                    case "writeStatement":
+                        GetWriteStatementAssembly(item);
+                        break;
+
+                    case "readStatement":
+                        GetReadStatementAssembly(item);
+                        break;
                 }
             }
+        }
+
+        private void GetReadStatementAssembly(string item)
+        {
+            //throw new NotImplementedException();
+        }
+
+        private void GetWriteStatementAssembly(string item)
+        {
+            throw new NotImplementedException();
         }
 
         private void GetVarDeclareAssembly(string item)
@@ -49,9 +69,9 @@ namespace LexDriver
             this.VarOrParam.Add(content.Split(' ')[1].Trim(), content.Split(' ')[0].Trim());
             int size = Common.dictMemSize[content.Split(' ')[0].Trim()];
             if (memorySize > 1)
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), content.Split(' ')[1].Trim() + "      res " + (size * memorySize) + "\n");
+                File.AppendAllText(filePath, content.Split(' ')[1].Trim() + "      res " + (size * memorySize) + "\n");
             else
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), content.Split(' ')[1].Trim() + "      res " + size + "\n");
+                File.AppendAllText(filePath, content.Split(' ')[1].Trim() + "      res " + size + "\n");
         }
 
         private void GetAssignStatementAssembly(string item)
@@ -86,13 +106,13 @@ namespace LexDriver
                 if (arrayIndexes != null && arrayIndexes.Length > 0)
                 {
                     int reg = WriteArrayAssemblyCode(arrayIndexes, arraysize);
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r" + reg + "," + arrOperands[1].Trim() + "(r0)" + "\n");
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + arrOperands[0].Split('[')[0].Trim() + "r" + (reg - 1) + ",r" + reg + "\n");
+                    File.AppendAllText(filePath, "lw r" + reg + "," + arrOperands[1].Trim() + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "sw " + arrOperands[0].Split('[')[0].Trim() + "r" + (reg - 1) + ",r" + reg + "\n");
                 }
                 else
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[1].Trim() + "(r0)" + "\n");
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + arrOperands[0].Trim() + "(r0),r1" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + arrOperands[1].Trim() + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "sw " + arrOperands[0].Trim() + "(r0),r1" + "\n");
                 }
             }
             else
@@ -100,11 +120,11 @@ namespace LexDriver
                 if (arrayIndexes != null && arrayIndexes.Length > 0)
                 {
                     int reg = WriteArrayAssemblyCode(arrayIndexes, arraysize);
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + arrOperands[0].Split('[')[0].Trim() + "(r" + (reg - 1) + ")," + arrOperands[1].Trim() + "\n");
+                    File.AppendAllText(filePath, "sw " + arrOperands[0].Split('[')[0].Trim() + "(r" + (reg - 1) + ")," + arrOperands[1].Trim() + "\n");
                 }
                 else
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + arrOperands[0].Trim() + "(r0)," + arrOperands[1].Trim() + "\n");
+                    File.AppendAllText(filePath, "sw " + arrOperands[0].Trim() + "(r0)," + arrOperands[1].Trim() + "\n");
                 }
             }
         }
@@ -146,69 +166,69 @@ namespace LexDriver
                         if (firstOperandReg != null && firstOperandReg.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(firstOperandReg, rightOpr1ArraySize);
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[0].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
                         }
                         else
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
                         if (secondOperandReg != null && secondOperandReg.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(secondOperandReg, rightOpr2ArraySize);
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r2," + arrOperands[1].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                            File.AppendAllText(filePath, "lw r2," + arrOperands[1].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
                         }
                         else
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r2," + arrOperands[1].Trim() + "(r0)" + "\n");
-                        File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), oprName + " r3,r1,r2" + "\n");
+                            File.AppendAllText(filePath, "lw r2," + arrOperands[1].Trim() + "(r0)" + "\n");
+                        File.AppendAllText(filePath, oprName + " r3,r1,r2" + "\n");
                         if (leftArrayIndexes != null && leftArrayIndexes.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(leftArrayIndexes, leftArraySize);
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
+                            File.AppendAllText(filePath, "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
                         }
                         else
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand + "(r0),r3" + "\n");
+                            File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r3" + "\n");
                     }
                     else
                     {
                         if (firstOperandReg != null && firstOperandReg.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(firstOperandReg, rightOpr1ArraySize);
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[0].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
                         }
                         else
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
-                        File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), oprName + "i r2,r1," + arrOperands[1].Trim() + "\n");
+                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
+                        File.AppendAllText(filePath, oprName + "i r2,r1," + arrOperands[1].Trim() + "\n");
 
                         if (leftArrayIndexes != null && leftArrayIndexes.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(leftArrayIndexes, leftArraySize);
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
+                            File.AppendAllText(filePath, "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
                         }
                         else
-                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand + "(r0),r2" + "\n");
+                            File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r2" + "\n");
                     }
                 }
                 else if (Common.lstAlphabets.Contains(arrOperands[1].Trim()[0].ToString().ToLower().Trim()))
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[1].Trim() + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + arrOperands[1].Trim() + "(r0)" + "\n");
                     if (secondOperandReg != null && secondOperandReg.Length > 0)
                     {
                         int result = WriteArrayAssemblyCode(secondOperandReg, rightOpr2ArraySize);
-                        File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r2," + arrOperands[1].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                        File.AppendAllText(filePath, "lw r2," + arrOperands[1].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
                     }
                     else
-                        File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), oprName + "i r2,r1," + arrOperands[0].Trim() + "\n");
+                        File.AppendAllText(filePath, oprName + "i r2,r1," + arrOperands[0].Trim() + "\n");
                     if (leftArrayIndexes != null && leftArrayIndexes.Length > 0)
                     {
                         int result = WriteArrayAssemblyCode(leftArrayIndexes, leftArraySize);
-                        File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
+                        File.AppendAllText(filePath, "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
                     }
                     else
-                        File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand + "(r0),r2" + "\n");
+                        File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r2" + "\n");
                 }
                 else
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), oprName + "i r2,r1," + arrOperands[1].Trim() + "\n");
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "sw " + leftOperand + "(r0),r2" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
+                    File.AppendAllText(filePath, oprName + "i r2,r1," + arrOperands[1].Trim() + "\n");
+                    File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r2" + "\n");
                 }
             }
         }
@@ -218,18 +238,18 @@ namespace LexDriver
             int multiplyRegCount = arrayIndexes.Length + 1;
             for (int i = 1; i <= arrayIndexes.Length; i++)
             {
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "lw r" + i + "," + arrayIndexes[i - 1] + "(r0)" + "\n");
+                File.AppendAllText(filePath, "lw r" + i + "," + arrayIndexes[i - 1] + "(r0)" + "\n");
             }
             for (int i = 1; i <= arrayIndexes.Length; i++)
             {
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "muli r" + multiplyRegCount + ",r" + i + "," + (arrayIndexes[i - 1] * Common.dictMemSize["integer"] * arraysize) + "\n");
+                File.AppendAllText(filePath, "muli r" + multiplyRegCount + ",r" + i + "," + (arrayIndexes[i - 1] * Common.dictMemSize["integer"] * arraysize) + "\n");
                 arraysize = 1;
                 multiplyRegCount = multiplyRegCount + 1;
             }
             int addRegCount = multiplyRegCount;
             for (int i = arrayIndexes.Length + 1; i <= multiplyRegCount; i = i * 2)
             {
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".moon"), "add r" + addRegCount + ",r" + i + ",r" + (i + 1) + "\n");
+                File.AppendAllText(filePath, "add r" + addRegCount + ",r" + i + ",r" + (i + 1) + "\n");
                 addRegCount = addRegCount + 1;
             }
             return addRegCount;
