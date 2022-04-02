@@ -1,29 +1,21 @@
 
-functionCall# main System.Collections.Generic.List`1[System.String]
-generateStatementBlockCode
-varDeclare# integer n1
-varDeclare# integer n2
-assignStatement# n1 = 7
-assignStatement# n2 = 209
-generateIfStatementCode
-generateRelExprCode
-varDeclare# integer temp0
-assignStatement# temp0 = n2 + 9
-varDeclare# integer temp1
-assignStatement# temp1 = temp0 / 2
-varDeclare# integer temp2
-assignStatement# temp2 = n1 - 6
-varDeclare# integer temp3
-assignStatement# temp3 = temp2 * 100
-assignStatement# temp3 >= temp1
-====generateRelExprCode=====
-generateStatementBlockCode
-assignStatement# n = 8
-======generateStatementBlockCode======
-generateStatementBlockCode
-assignStatement# n = 2
-======generateStatementBlockCode======
-=====generateIfStatementCode======
-writeStatement# write n
-======generateStatementBlockCode======
-functionCall# main System.Collections.Generic.List`1[System.String]
+start functionDef# main :void
+start generateStatementBlockCode
+varDeclare# integer x
+readStatement# read x
+start generateIfStatementCode#
+start generateRelExprCode
+condition# x == 3
+end generateRelExprCode
+start block 1
+start generateStatementBlockCode
+writeStatement# write x
+end generateStatementBlockCode
+end block 1
+start block 2
+start generateStatementBlockCode
+end generateStatementBlockCode
+end block 2
+end generateIfStatementCode#
+end generateStatementBlockCode
+end functionDef# main 

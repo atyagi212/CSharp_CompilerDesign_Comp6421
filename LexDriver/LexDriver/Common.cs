@@ -20,5 +20,6 @@ namespace LexDriver
 
         public static Dictionary<string, int> dictMemSize = new Dictionary<string, int>() { { "integer", 4 }, { "float", 8 } };
         public static Dictionary<string, string> dictOprName = new Dictionary<string, string>() { { "+", "add" }, { "-", "sub" }, { "*", "mul" }, { "/", "div" } };
+        public static Dictionary<string, string> dictCompareOpr = new Dictionary<string, string>() { { " and ", "and" }, { " or ", "or" }, { " not ", "not" }, { " == ", "ceq" }, { " != ", "cne" }, { " <= ", "cle" }, { " < ", "clt" }, { " >= ", "cge" }, { " > ", "cgt" }, };
     }
 }

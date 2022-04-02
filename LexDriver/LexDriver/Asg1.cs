@@ -138,7 +138,7 @@ namespace LexDriver
                             if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".imt")))
                                 using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".imt"))) ;
                             CodeGenerator codeGenerator = new CodeGenerator(filename);
-                            moonContent= codeGenerator.generate(node);
+                            moonContent = codeGenerator.generate(node);
                             File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".imt"), moonContent.ToString());
 
                         }
@@ -166,6 +166,7 @@ namespace LexDriver
                             MoonAsmCodeGenerator.arrFileContent = File.ReadAllLines(file.FullName);
                             if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon")))
                                 using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon"))) ;
+                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "entry" + "\n");
                             MoonAsmCodeGenerator moonObj = new MoonAsmCodeGenerator(filename);
                             moonObj.GenerateAssemblyCode();
 
