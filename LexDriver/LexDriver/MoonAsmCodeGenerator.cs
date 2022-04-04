@@ -99,7 +99,7 @@ namespace LexDriver
                             File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
                             File.AppendAllText(filePath, "lw r2," + operands[1].Trim() + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + " r3,r1,r2" + "\n");
-                            File.AppendAllText(filePath, "bz r3,endwhile1" + "\n");
+                            File.AppendAllText(filePath, "bnz r3,endwhile1" + "\n");
                             index = WhileStatementBlock1(index, rootBlockCode);
                         }
                         if (rootBlockCode.Last() == "end generateIfStatementCode#")
@@ -107,7 +107,7 @@ namespace LexDriver
                             File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
                             File.AppendAllText(filePath, "lw r2," + operands[1].Trim() + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + " r3,r1,r2" + "\n");
-                            File.AppendAllText(filePath, "bz r3,block2" + "\n");
+                            File.AppendAllText(filePath, "bnz r3,block2" + "\n");
                             index = StatementBlock1(index, rootBlockCode);
                             index = StatementBlock2(index, rootBlockCode);
                         }
@@ -121,14 +121,14 @@ namespace LexDriver
                             File.AppendAllText(filePath, "gowhile1" + "\n");
                             File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + "i r2,r1," + operands[1].Trim() + "\n");
-                            File.AppendAllText(filePath, "bz r2,endwhile1" + "\n");
+                            File.AppendAllText(filePath, "bnz r2,endwhile1" + "\n");
                             index = WhileStatementBlock1(index, rootBlockCode);
                         }
                         if (rootBlockCode.Last() == "end generateIfStatementCode#")
                         {
                             File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + "i r2,r1," + operands[1].Trim() + "\n");
-                            File.AppendAllText(filePath, "bz r2,block2" + "\n");
+                            File.AppendAllText(filePath, "bnz r2,block2" + "\n");
                             index = StatementBlock1(index, rootBlockCode);
                             index = StatementBlock2(index, rootBlockCode);
                         }
@@ -145,6 +145,13 @@ namespace LexDriver
 
         private int WhileStatementBlock1(int index, List<string> rootBlockCode)
         {
+            VarOrParam.Add("buf", 40);
+            File.AppendAllText(filePath, "sw -8(r14),r1" + "\n");
+            File.AppendAllText(filePath, "addi r1, r0, buf" + "\n");
+            File.AppendAllText(filePath, "sw -12(r14),r1" + "\n");
+            File.AppendAllText(filePath, "jl     r15,intstr" + "\n");
+            File.AppendAllText(filePath, "sw -8(r14),r13" + "\n");
+            File.AppendAllText(filePath, "jl     r15,putstr" + "\n");
             Dictionary<string, int> temp = new Dictionary<string, int>();
             List<string> blockCode = new List<string>();
             int nextContentToRead = 0;
@@ -174,6 +181,13 @@ namespace LexDriver
 
         private int StatementBlock2(int index, List<string> rootBlockCode)
         {
+            VarOrParam.Add("buf", 40);
+            File.AppendAllText(filePath, "sw -8(r14),r1" + "\n");
+            File.AppendAllText(filePath, "addi r1, r0, buf" + "\n");
+            File.AppendAllText(filePath, "sw -12(r14),r1" + "\n");
+            File.AppendAllText(filePath, "jl     r15,intstr" + "\n");
+            File.AppendAllText(filePath, "sw -8(r14),r13" + "\n");
+            File.AppendAllText(filePath, "jl     r15,putstr" + "\n");
             Dictionary<string, int> temp = new Dictionary<string, int>();
             List<string> blockCode = new List<string>();
             int nextContentToRead = 0;
@@ -233,25 +247,14 @@ namespace LexDriver
         {
             isread = true;
             string content = item.Split('#')[1].Trim();
-            File.AppendAllText(filePath, "getc r1" + "\n");
-            if (content.Split(' ')[1].Contains('['))
+            if (!VarOrParam.ContainsKey("buf"))
             {
-                var keyExist = false;
-                int arrSize = 0;
-                int[] indexes = GetArrayIndexes(content.Split(' ')[1].Trim());
-                foreach (var keypair in dictVarParam)
+                File.AppendAllText(filePath, "getc r1" + "\n");
+                if (content.Split(' ')[1].Contains('['))
                 {
-                    if (keypair.Key.Split(',')[0].Trim() == content.Split(' ')[1].Split('[')[0].Trim())
-                    {
-                        keyExist = true;
-                        arrSize = dictVarParam[keypair.Key];
-                        break;
-                    }
-                }
-                if (!keyExist)
-                {
-                    dictVarParam = new Dictionary<string, int>();
-                    dictVarParam = this.VarOrParam;
+                    var keyExist = false;
+                    int arrSize = 0;
+                    int[] indexes = GetArrayIndexes(content.Split(' ')[1].Trim());
                     foreach (var keypair in dictVarParam)
                     {
                         if (keypair.Key.Split(',')[0].Trim() == content.Split(' ')[1].Split('[')[0].Trim())
@@ -261,13 +264,27 @@ namespace LexDriver
                             break;
                         }
                     }
+                    if (!keyExist)
+                    {
+                        dictVarParam = new Dictionary<string, int>();
+                        dictVarParam = this.VarOrParam;
+                        foreach (var keypair in dictVarParam)
+                        {
+                            if (keypair.Key.Split(',')[0].Trim() == content.Split(' ')[1].Split('[')[0].Trim())
+                            {
+                                keyExist = true;
+                                arrSize = dictVarParam[keypair.Key];
+                                break;
+                            }
+                        }
+                    }
+                    int reg = WriteArrayAssemblyCode(indexes, arrSize);
+                    File.AppendAllText(filePath, "sw " + content.Split(' ')[1].Trim().Split('[')[0].Trim() + "(r" + (reg - 1) + "),r1" + "\n");
                 }
-                int reg = WriteArrayAssemblyCode(indexes, arrSize);
-                File.AppendAllText(filePath, "sw " + content.Split(' ')[1].Trim().Split('[')[0].Trim() + "(r" + (reg - 1) + "),r1" + "\n");
-            }
-            else
-            {
-                File.AppendAllText(filePath, "sw " + content.Split(' ')[1].Trim() + "(r0),r1" + "\n");
+                else
+                {
+                    File.AppendAllText(filePath, "sw " + content.Split(' ')[1].Trim() + "(r0),r1" + "\n");
+                }
             }
 
         }
@@ -275,24 +292,13 @@ namespace LexDriver
         private void GetWriteStatementAssembly(string item, Dictionary<string, int> dictVarParam)
         {
             string content = item.Split('#')[1].Trim();
-            if (content.Split(' ')[1].Contains('['))
+            if (!VarOrParam.ContainsKey("buf"))
             {
-                var keyExist = false;
-                int arrSize = 0;
-                int[] indexes = GetArrayIndexes(content.Split(' ')[1].Trim());
-                foreach (var keypair in dictVarParam)
+                if (content.Split(' ')[1].Contains('['))
                 {
-                    if (keypair.Key.Split(',')[0].Trim() == content.Split(' ')[1].Split('[')[0].Trim())
-                    {
-                        keyExist = true;
-                        arrSize = dictVarParam[keypair.Key];
-                        break;
-                    }
-                }
-                if (!keyExist)
-                {
-                    dictVarParam = new Dictionary<string, int>();
-                    dictVarParam = this.VarOrParam;
+                    var keyExist = false;
+                    int arrSize = 0;
+                    int[] indexes = GetArrayIndexes(content.Split(' ')[1].Trim());
                     foreach (var keypair in dictVarParam)
                     {
                         if (keypair.Key.Split(',')[0].Trim() == content.Split(' ')[1].Split('[')[0].Trim())
@@ -302,16 +308,30 @@ namespace LexDriver
                             break;
                         }
                     }
+                    if (!keyExist)
+                    {
+                        dictVarParam = new Dictionary<string, int>();
+                        dictVarParam = this.VarOrParam;
+                        foreach (var keypair in dictVarParam)
+                        {
+                            if (keypair.Key.Split(',')[0].Trim() == content.Split(' ')[1].Split('[')[0].Trim())
+                            {
+                                keyExist = true;
+                                arrSize = dictVarParam[keypair.Key];
+                                break;
+                            }
+                        }
+                    }
+                    int reg = WriteArrayAssemblyCode(indexes, arrSize);
+                    File.AppendAllText(filePath, "lw r1," + content.Split(' ')[1].Trim().Split('[')[0].Trim() + "(r" + (reg - 1) + ")" + "\n");
                 }
-                int reg = WriteArrayAssemblyCode(indexes, arrSize);
-                File.AppendAllText(filePath, "lw r1," + content.Split(' ')[1].Trim().Split('[')[0].Trim() + "(r" + (reg - 1) + ")" + "\n");
-            }
-            else
-            {
-                File.AppendAllText(filePath, "lw r1," + content.Split(' ')[1].Trim() + "(r0)" + "\n");
-            }
+                else
+                {
+                    File.AppendAllText(filePath, "lw r1," + content.Split(' ')[1].Trim() + "(r0)" + "\n");
+                }
 
-            File.AppendAllText(filePath, "putc r1" + "\n");
+                File.AppendAllText(filePath, "putc r1" + "\n");
+            }
         }
 
         private Dictionary<string, int> GetVarDeclareAssembly(string item, Dictionary<string, int> temp)

@@ -1,8 +1,0 @@
-func main() -> void {
-    let x: integer;
-    read(x);
-    if (x == 3) then {
-        write(x);
-    } else;
-}
-$

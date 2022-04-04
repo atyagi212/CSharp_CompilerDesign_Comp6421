@@ -167,6 +167,7 @@ namespace LexDriver
                             if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon")))
                                 using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon"))) ;
                             File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "entry" + "\n");
+                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "addi   r14,r0,topaddr  % Set stack pointer" + "\n");
                             MoonAsmCodeGenerator moonObj = new MoonAsmCodeGenerator(filename);
                             moonObj.GenerateAssemblyCode();
 

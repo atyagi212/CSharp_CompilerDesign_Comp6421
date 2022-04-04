@@ -1,0 +1,26 @@
+
+start functionDef# printTillNum integer size:void
+start generateStatementBlockCode
+varDeclare# integer i
+assignStatement# i = 1
+start generateWhileStatementCode
+start generateRelExprCode
+condition# i < size
+end generateRelExprCode
+start generateStatementBlockCode
+writeStatement# write i
+varDeclare# integer temp0
+assignStatement# temp0 = i + 1
+assignStatement# i = temp0
+end generateStatementBlockCode
+end generateWhileStatementCode
+end generateStatementBlockCode
+end functionDef# printTillNum integer size
+
+start functionDef# main :void
+start generateStatementBlockCode
+varDeclare# integer x
+assignStatement# x = 10
+funcCall# printTillNum x
+end generateStatementBlockCode
+end functionDef# main 
