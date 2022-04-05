@@ -212,6 +212,8 @@ namespace LexDriver
 
         private int StatementBlock1(int index, List<string> rootBlockCode)
         {
+            if (!VarOrParam.ContainsKey("buf"))
+                VarOrParam.Add("buf", 40);
             Dictionary<string, int> temp = new Dictionary<string, int>();
             List<string> blockCode = new List<string>();
             int nextContentToRead = 0;
@@ -275,11 +277,11 @@ namespace LexDriver
                         }
                     }
                     int reg = WriteArrayAssemblyCode(indexes, arrSize);
-                    File.AppendAllText(filePath, "sw " + content.Split(' ')[1].Trim().Split('[')[0].Trim() + "(r" + (reg - 1) + "),r1" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + content.Split(' ')[1].Trim().Split('[')[0].Trim()) + "(r" + (reg - 1) + "),r1" + "\n");
                 }
                 else
                 {
-                    File.AppendAllText(filePath, "sw " + content.Split(' ')[1].Trim() + "(r0),r1" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + content.Split(' ')[1].Trim()) + "(r0),r1" + "\n");
                 }
             }
 
@@ -319,11 +321,11 @@ namespace LexDriver
                         }
                     }
                     int reg = WriteArrayAssemblyCode(indexes, arrSize);
-                    File.AppendAllText(filePath, "lw r1," + content.Split(' ')[1].Trim().Split('[')[0].Trim() + "(r" + (reg - 1) + ")" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + (functionName + content.Split(' ')[1].Trim().Split('[')[0].Trim()) + "(r" + (reg - 1) + ")" + "\n");
                 }
                 else
                 {
-                    File.AppendAllText(filePath, "lw r1," + content.Split(' ')[1].Trim() + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + (functionName + content.Split(' ')[1].Trim()) + "(r0)" + "\n");
                 }
 
                 File.AppendAllText(filePath, "putc r1" + "\n");
