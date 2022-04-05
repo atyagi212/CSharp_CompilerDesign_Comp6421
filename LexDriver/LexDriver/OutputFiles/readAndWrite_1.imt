@@ -1,0 +1,8 @@
+
+start functionDef# main :void
+start generateStatementBlockCode
+varDeclare# integer n
+readStatement# read n
+writeStatement# write n
+end generateStatementBlockCode
+end functionDef# main 

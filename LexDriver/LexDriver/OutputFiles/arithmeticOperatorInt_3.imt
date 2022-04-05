@@ -1,0 +1,14 @@
+
+start functionDef# main :void
+start generateStatementBlockCode
+varDeclare# integer arr[5][5]
+varDeclare# integer n
+readStatement# read arr[0][0]
+varDeclare# integer temp0
+assignStatement# temp0 = 2 * 3
+varDeclare# integer temp1
+assignStatement# temp1 = arr[0][0] + temp0
+assignStatement# n = temp1
+writeStatement# write n
+end generateStatementBlockCode
+end functionDef# main 

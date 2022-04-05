@@ -1,0 +1,11 @@
+
+start functionDef# main :void
+start generateStatementBlockCode
+varDeclare# integer n
+readStatement# read n
+varDeclare# integer temp7
+assignStatement# temp7 = n + 2
+assignStatement# n = temp7
+writeStatement# write n
+end generateStatementBlockCode
+end functionDef# main 

@@ -1,0 +1,10 @@
+func main() -> void {
+    let i: integer;
+
+    i=3;
+    while(i < 9) {
+       write(i);
+       i = i + 1;
+    };
+}
+$
