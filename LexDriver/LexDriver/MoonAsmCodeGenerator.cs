@@ -12,6 +12,7 @@ namespace LexDriver
         private string filePath;
         public Dictionary<string, int> VarOrParam;
         private bool isread;
+        private string functionName;
 
         public MoonAsmCodeGenerator(string fileName)
         {
@@ -23,11 +24,16 @@ namespace LexDriver
         public void GenerateAssemblyCode()
         {
             int nextContentToRead = 0;
+            var funcDefCount = Array.FindAll(arrFileContent, x => x.Contains("start functionDef#")).Count();
+            if (funcDefCount > 1)
+            {
+                File.AppendAllText(filePath, "j main" + "\n");
+            }
             foreach (var item in arrFileContent.Select((value, index) => new { index, value }))
             {
                 nextContentToRead = ProcessingTags(item.value, item.index, nextContentToRead, arrFileContent.ToList(), ref VarOrParam);
             }
-            File.AppendAllText(filePath, "hlt" + "\n");
+            //File.AppendAllText(filePath, "hlt" + "\n");
             foreach (var item in VarOrParam)
             {
                 int size = 0;
@@ -96,18 +102,18 @@ namespace LexDriver
                         if (rootBlockCode.Last() == "end generateWhileStatementCode")
                         {
                             File.AppendAllText(filePath, "gowhile1" + "\n");
-                            File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
-                            File.AppendAllText(filePath, "lw r2," + operands[1].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (VarOrParam.ContainsKey(functionName + operands[0].Trim()) ? functionName + operands[0].Trim() : operands[0].Trim()) + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r2," + (VarOrParam.ContainsKey(functionName + operands[1].Trim()) ? functionName + operands[1].Trim() : operands[1].Trim()) + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + " r3,r1,r2" + "\n");
-                            File.AppendAllText(filePath, "bnz r3,endwhile1" + "\n");
+                            File.AppendAllText(filePath, "bz r3,endwhile1" + "\n");
                             index = WhileStatementBlock1(index, rootBlockCode);
                         }
                         if (rootBlockCode.Last() == "end generateIfStatementCode#")
                         {
-                            File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
-                            File.AppendAllText(filePath, "lw r2," + operands[1].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (functionName + operands[0].Trim()) + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r2," + (functionName + operands[1].Trim()) + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + " r3,r1,r2" + "\n");
-                            File.AppendAllText(filePath, "bnz r3,block2" + "\n");
+                            File.AppendAllText(filePath, "bz r3,block2" + "\n");
                             index = StatementBlock1(index, rootBlockCode);
                             index = StatementBlock2(index, rootBlockCode);
                         }
@@ -119,16 +125,16 @@ namespace LexDriver
                         if (rootBlockCode.Last() == "end generateWhileStatementCode")
                         {
                             File.AppendAllText(filePath, "gowhile1" + "\n");
-                            File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (VarOrParam.ContainsKey(functionName + operands[0].Trim()) ? functionName + operands[0].Trim() : operands[0].Trim()) + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + "i r2,r1," + operands[1].Trim() + "\n");
-                            File.AppendAllText(filePath, "bnz r2,endwhile1" + "\n");
+                            File.AppendAllText(filePath, "bz r2,endwhile1" + "\n");
                             index = WhileStatementBlock1(index, rootBlockCode);
                         }
                         if (rootBlockCode.Last() == "end generateIfStatementCode#")
                         {
-                            File.AppendAllText(filePath, "lw r1," + operands[0].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (functionName + operands[0].Trim()) + "(r0)" + "\n");
                             File.AppendAllText(filePath, compOpr + "i r2,r1," + operands[1].Trim() + "\n");
-                            File.AppendAllText(filePath, "bnz r2,block2" + "\n");
+                            File.AppendAllText(filePath, "bz r2,block2" + "\n");
                             index = StatementBlock1(index, rootBlockCode);
                             index = StatementBlock2(index, rootBlockCode);
                         }
@@ -145,13 +151,8 @@ namespace LexDriver
 
         private int WhileStatementBlock1(int index, List<string> rootBlockCode)
         {
-            VarOrParam.Add("buf", 40);
-            File.AppendAllText(filePath, "sw -8(r14),r1" + "\n");
-            File.AppendAllText(filePath, "addi r1, r0, buf" + "\n");
-            File.AppendAllText(filePath, "sw -12(r14),r1" + "\n");
-            File.AppendAllText(filePath, "jl     r15,intstr" + "\n");
-            File.AppendAllText(filePath, "sw -8(r14),r13" + "\n");
-            File.AppendAllText(filePath, "jl     r15,putstr" + "\n");
+            if (!VarOrParam.ContainsKey("buf"))
+                VarOrParam.Add("buf", 40);
             Dictionary<string, int> temp = new Dictionary<string, int>();
             List<string> blockCode = new List<string>();
             int nextContentToRead = 0;
@@ -181,13 +182,8 @@ namespace LexDriver
 
         private int StatementBlock2(int index, List<string> rootBlockCode)
         {
-            VarOrParam.Add("buf", 40);
-            File.AppendAllText(filePath, "sw -8(r14),r1" + "\n");
-            File.AppendAllText(filePath, "addi r1, r0, buf" + "\n");
-            File.AppendAllText(filePath, "sw -12(r14),r1" + "\n");
-            File.AppendAllText(filePath, "jl     r15,intstr" + "\n");
-            File.AppendAllText(filePath, "sw -8(r14),r13" + "\n");
-            File.AppendAllText(filePath, "jl     r15,putstr" + "\n");
+            if (!VarOrParam.ContainsKey("buf"))
+                VarOrParam.Add("buf", 40);
             Dictionary<string, int> temp = new Dictionary<string, int>();
             List<string> blockCode = new List<string>();
             int nextContentToRead = 0;
@@ -332,6 +328,15 @@ namespace LexDriver
 
                 File.AppendAllText(filePath, "putc r1" + "\n");
             }
+            else
+            {
+                File.AppendAllText(filePath, "sw -8(r14),r1" + "\n");
+                File.AppendAllText(filePath, "addi r1, r0, buf" + "\n");
+                File.AppendAllText(filePath, "sw -12(r14),r1" + "\n");
+                File.AppendAllText(filePath, "jl     r15,intstr" + "\n");
+                File.AppendAllText(filePath, "sw -8(r14),r13" + "\n");
+                File.AppendAllText(filePath, "jl     r15,putstr" + "\n");
+            }
         }
 
         private Dictionary<string, int> GetVarDeclareAssembly(string item, Dictionary<string, int> temp)
@@ -349,11 +354,11 @@ namespace LexDriver
             if (content.Split(' ')[1].Contains('['))
             {
                 int[] indexes = GetArrayIndexes(content.Split(' ')[1].Trim());
-                VarOrParam.Add(content.Split(' ')[1].Split('[')[0].Trim() + "," + content.Split(' ')[0].Trim() + "," + memorySize, indexes.Max());
+                VarOrParam.Add(functionName + content.Split(' ')[1].Split('[')[0].Trim() + "," + content.Split(' ')[0].Trim() + "," + memorySize, indexes.Max());
             }
             else
             {
-                VarOrParam.Add(content.Split(' ')[1].Trim(), Common.dictMemSize[content.Split(' ')[0].Trim()]);
+                VarOrParam.Add(functionName + content.Split(' ')[1].Trim(), Common.dictMemSize[content.Split(' ')[0].Trim()]);
             }
 
             return temp;
@@ -398,13 +403,13 @@ namespace LexDriver
                 if (arrayIndexes != null && arrayIndexes.Length > 0)
                 {
                     int reg = WriteArrayAssemblyCode(arrayIndexes, arraysize);
-                    File.AppendAllText(filePath, "lw r" + reg + "," + arrOperands[1].Trim() + "(r0)" + "\n");
-                    File.AppendAllText(filePath, "sw " + arrOperands[0].Split('[')[0].Trim() + "r" + (reg - 1) + ",r" + reg + "\n");
+                    File.AppendAllText(filePath, "lw r" + reg + "," + (functionName + arrOperands[1].Trim()) + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + arrOperands[0].Split('[')[0].Trim()) + "r" + (reg - 1) + ",r" + reg + "\n");
                 }
                 else
                 {
-                    File.AppendAllText(filePath, "lw r1," + arrOperands[1].Trim() + "(r0)" + "\n");
-                    File.AppendAllText(filePath, "sw " + arrOperands[0].Trim() + "(r0),r1" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + (functionName + arrOperands[1].Trim()) + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + arrOperands[0].Trim()) + "(r0),r1" + "\n");
                 }
             }
             else
@@ -413,12 +418,12 @@ namespace LexDriver
                 {
                     int reg = WriteArrayAssemblyCode(arrayIndexes, arraysize);
                     File.AppendAllText(filePath, "addi r1,r0," + arrOperands[1].Trim() + "\n");
-                    File.AppendAllText(filePath, "sw " + arrOperands[0].Split('[')[0].Trim() + "(r" + (reg - 1) + "),r1" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + arrOperands[0].Split('[')[0].Trim()) + "(r" + (reg - 1) + "),r1" + "\n");
                 }
                 else
                 {
                     File.AppendAllText(filePath, "addi r1,r0," + arrOperands[1].Trim() + "\n");
-                    File.AppendAllText(filePath, "sw " + arrOperands[0].Trim() + "(r0),r1" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + arrOperands[0].Trim()) + "(r0),r1" + "\n");
                 }
             }
         }
@@ -427,7 +432,15 @@ namespace LexDriver
         {
             string temp = v1.Substring(v1.IndexOf('[') + 1).TrimEnd(']');
             string[] arrTemp = temp.Split("][");
-            return arrTemp.Select(int.Parse).ToArray();
+            List<string> result = new List<string>();
+            foreach (var item in arrTemp)
+            {
+                if (Common.lstAlphabets.Contains(item[0].ToString().ToLower()))
+                    result.Add("0");
+                else
+                    result.Add(item);
+            }
+            return result.Select(int.Parse).ToArray();
         }
 
         private void GenerateAirthmeticAssembly(string leftOperand, string rightOperands, int[] leftArrayIndexes, string opr, Dictionary<string, int> dictVarParam)
@@ -483,69 +496,69 @@ namespace LexDriver
                         if (firstOperandReg != null && firstOperandReg.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(firstOperandReg, rightOpr1ArraySize);
-                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (functionName + arrOperands[0].Trim().Split('[')[0]) + "(r" + (result - 1) + ")" + "\n");
                         }
                         else
-                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (functionName + arrOperands[0].Trim()) + "(r0)" + "\n");
                         if (secondOperandReg != null && secondOperandReg.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(secondOperandReg, rightOpr2ArraySize);
-                            File.AppendAllText(filePath, "lw r2," + arrOperands[1].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                            File.AppendAllText(filePath, "lw r2," + (functionName + arrOperands[1].Trim().Split('[')[0]) + "(r" + (result - 1) + ")" + "\n");
                         }
                         else
-                            File.AppendAllText(filePath, "lw r2," + arrOperands[1].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r2," + (functionName + arrOperands[1].Trim()) + "(r0)" + "\n");
                         File.AppendAllText(filePath, oprName + " r3,r1,r2" + "\n");
                         if (leftArrayIndexes != null && leftArrayIndexes.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(leftArrayIndexes, leftArraySize);
-                            File.AppendAllText(filePath, "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
+                            File.AppendAllText(filePath, "sw " + (functionName + leftOperand.Split('[')[0]) + "(r" + (result - 1) + "),r3" + "\n");
                         }
                         else
-                            File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r3" + "\n");
+                            File.AppendAllText(filePath, "sw " + (functionName + leftOperand) + "(r0),r3" + "\n");
                     }
                     else
                     {
                         if (firstOperandReg != null && firstOperandReg.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(firstOperandReg, rightOpr1ArraySize);
-                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (functionName + arrOperands[0].Trim().Split('[')[0]) + "(r" + (result - 1) + ")" + "\n");
                         }
                         else
-                            File.AppendAllText(filePath, "lw r1," + arrOperands[0].Trim() + "(r0)" + "\n");
+                            File.AppendAllText(filePath, "lw r1," + (functionName + arrOperands[0].Trim()) + "(r0)" + "\n");
                         File.AppendAllText(filePath, oprName + "i r2,r1," + arrOperands[1].Trim() + "\n");
 
                         if (leftArrayIndexes != null && leftArrayIndexes.Length > 0)
                         {
                             int result = WriteArrayAssemblyCode(leftArrayIndexes, leftArraySize);
-                            File.AppendAllText(filePath, "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
+                            File.AppendAllText(filePath, "sw " + (functionName + leftOperand.Split('[')[0]) + "(r" + (result - 1) + "),r3" + "\n");
                         }
                         else
-                            File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r2" + "\n");
+                            File.AppendAllText(filePath, "sw " + (functionName + leftOperand) + "(r0),r2" + "\n");
                     }
                 }
                 else if (Common.lstAlphabets.Contains(arrOperands[1].Trim()[0].ToString().ToLower().Trim()))
                 {
-                    File.AppendAllText(filePath, "lw r1," + arrOperands[1].Trim() + "(r0)" + "\n");
+                    File.AppendAllText(filePath, "lw r1," + (functionName + arrOperands[1].Trim()) + "(r0)" + "\n");
                     if (secondOperandReg != null && secondOperandReg.Length > 0)
                     {
                         int result = WriteArrayAssemblyCode(secondOperandReg, rightOpr2ArraySize);
-                        File.AppendAllText(filePath, "lw r2," + arrOperands[1].Trim().Split('[')[0] + "(r" + (result - 1) + ")" + "\n");
+                        File.AppendAllText(filePath, "lw r2," + (functionName + arrOperands[1].Trim().Split('[')[0]) + "(r" + (result - 1) + ")" + "\n");
                     }
                     else
                         File.AppendAllText(filePath, oprName + "i r2,r1," + arrOperands[0].Trim() + "\n");
                     if (leftArrayIndexes != null && leftArrayIndexes.Length > 0)
                     {
                         int result = WriteArrayAssemblyCode(leftArrayIndexes, leftArraySize);
-                        File.AppendAllText(filePath, "sw " + leftOperand.Split('[')[0] + "(r" + (result - 1) + "),r3" + "\n");
+                        File.AppendAllText(filePath, "sw " + (functionName + leftOperand.Split('[')[0]) + "(r" + (result - 1) + "),r3" + "\n");
                     }
                     else
-                        File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r2" + "\n");
+                        File.AppendAllText(filePath, "sw " + (functionName + leftOperand) + "(r0),r2" + "\n");
                 }
                 else
                 {
                     File.AppendAllText(filePath, "addi r1,r0," + arrOperands[0].Trim() + "\n");
                     File.AppendAllText(filePath, oprName + "i r2,r1," + arrOperands[1].Trim() + "\n");
-                    File.AppendAllText(filePath, "sw " + leftOperand + "(r0),r2" + "\n");
+                    File.AppendAllText(filePath, "sw " + (functionName + leftOperand) + "(r0),r2" + "\n");
                 }
             }
         }
@@ -666,14 +679,16 @@ namespace LexDriver
                             }
                             else
                             {
-                                File.AppendAllText(filePath, "lw r" + (item.index + 1) + "," + item.value + "(r0)" + "\n");
-                                File.AppendAllText(filePath, "sw " + functionName + "p" + (item.index + 1) + "(r0),r" + (item.index + 1) + "\n");
+                                File.AppendAllText(filePath, "lw r" + (item.index + 1) + "," + (this.functionName + item.value) + "(r0)" + "\n");
+                                string key = VarOrParam.FirstOrDefault(kvp => kvp.Key.Contains(functionName)).Key;
+                                File.AppendAllText(filePath, "sw " + key + "(r0),r" + (item.index + 1) + "\n");
                             }
                         }
                         else
                         {
                             File.AppendAllText(filePath, "lw r" + (item.index + 1) + "," + item.value + "(r0)" + "\n");
-                            File.AppendAllText(filePath, "sw " + functionName + "p" + (item.index + 1) + "(r0),r" + (item.index + 1) + "\n");
+                            string key = VarOrParam.FirstOrDefault(kvp => kvp.Key.Contains(functionName)).Key;
+                            File.AppendAllText(filePath, "sw " + key + "(r0),r" + (item.index + 1) + "\n");
                         }
                     }
                 }
@@ -710,9 +725,10 @@ namespace LexDriver
         private int GetFunctionDeclAssembly(int index, List<string> rootBlockCode)
         {
             string functionSignature = rootBlockCode[index].Split('#')[1].Trim();
-            string functionName = functionSignature.Split(' ')[0].Trim();
+            functionName = functionSignature.Split(' ')[0].Trim();
             string[] parameters = functionSignature.Split(functionName)[1].Trim().Split(':')[0].Trim().Split(',');
             string returnType = functionSignature.Split(functionName)[1].Trim().Split(':')[1].Trim();
+            File.AppendAllText(filePath, functionName + "\n");
 
             if (returnType.ToLower() != "void")
                 File.AppendAllText(filePath, functionName + "res res " + Common.dictMemSize[returnType.ToLower()] + "\n");
@@ -723,10 +739,14 @@ namespace LexDriver
                 {
                     if (item.Split(' ')[1].Trim().Contains('['))
                     {
-                        File.AppendAllText(filePath, functionName + item.Split(' ')[1].Trim().Split('[')[0] + " res " + Common.dictMemSize[item.Split(' ')[0].Trim().ToLower()] + "\n");
+                        VarOrParam.Add(functionName + item.Split(' ')[1].Trim().Split('[')[0], Common.dictMemSize[item.Split(' ')[0].Trim().ToLower()]);
+                        //File.AppendAllText(filePath, functionName + item.Split(' ')[1].Trim().Split('[')[0] + " res " + Common.dictMemSize[item.Split(' ')[0].Trim().ToLower()] + "\n");
                     }
                     else
-                        File.AppendAllText(filePath, functionName + item.Split(' ')[1].Trim() + " res " + Common.dictMemSize[item.Split(' ')[0].Trim().ToLower()] + "\n");
+                    {
+                        VarOrParam.Add(functionName + item.Split(' ')[1].Trim(), Common.dictMemSize[item.Split(' ')[0].Trim().ToLower()]);
+                        //File.AppendAllText(filePath, functionName + item.Split(' ')[1].Trim() + " res " + Common.dictMemSize[item.Split(' ')[0].Trim().ToLower()] + "\n");
+                    }
                 }
             }
             List<string> blockCode = new List<string>();
@@ -754,7 +774,7 @@ namespace LexDriver
             }
             //File.AppendAllText(filePath, "jr r15" + "\n");
             //File.AppendAllText(filePath, functionName + "\n");
-
+            File.AppendAllText(filePath, "hlt" + "\n");
 
             return index;
         }
