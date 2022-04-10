@@ -26,4 +26,6 @@
 [error] Function call with wrong number of parameters: at line 118
 [error] Undeclared variable (check for existence of local variable): at line 117
 [error] Undeclared free function: at line 116
+[error] Undeclared member function (search in class table): at line 115
+[error] Undeclared data member (search in class table): at line 114
 [error] undeclared class: at line 104

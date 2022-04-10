@@ -112,6 +112,30 @@ namespace LexDriver
                     Common.semanticErrors.Add("[error] '.' operator used on non-class type: at line " + varName.line);
 
                 //leftSideOutputType = GetComplexVarType(p_Node, parentClass, allNodes, rootNode);
+                if (!string.IsNullOrEmpty(varNameType))
+                {
+                    var classType = allNodes.FindAll(x => x.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == varNameType).ToList();
+                    if (classType != null && classType.Count > 0)
+                    {
+                        var lstClassVariables = classType.FirstOrDefault().m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") != string.Empty && x.Field<string>("VariableName") != null && x.Field<string>("NodeType") == "Class").Select(z => z.Field<string>("VariableName")).ToList();
+                        if (lstClassVariables.Count > 0 && !lstClassVariables.Contains(variableName.value))
+                        {
+                            Common.semanticErrors.Add("[error] Undeclared data member (search in class table): at line " + varName.line);
+                        }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(paramType))
+                {
+                    var classType = allNodes.FindAll(x => x.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == paramType).ToList();
+                    if (classType != null && classType.Count > 0)
+                    {
+                        var lstClassVariables = classType.FirstOrDefault().m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") != string.Empty && x.Field<string>("VariableName") != null).Select(z => z.Field<string>("VariableName")).ToList();
+                        if (lstClassVariables.Count > 0 && !lstClassVariables.Contains(variableName.value))
+                        {
+                            Common.semanticErrors.Add("[error] Undeclared data member (search in class table): at line " + varName.line);
+                        }
+                    }
+                }
             }
 
             if (isArrayVar.Count > 0)
@@ -212,9 +236,11 @@ namespace LexDriver
         private string GetOutputFCallDMemberType(ASTNode p_Node, List<DataRow> parentClass, List<ASTNode> allNodes, ASTNode rootNode)
         {
             var funcdatamemberNode = p_Node.Children[0];
-            if (funcdatamemberNode.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "dot") == null)
+            var objectFunction = funcdatamemberNode.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "dot");
+            var variable = funcdatamemberNode.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "id").value;
+            if (objectFunction == null)
             {
-                var variable = funcdatamemberNode.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "id").value;
+
                 if (parentClass.Count == 0)
                 {
                     var row = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == variable || x.Field<string>("ParameterName") == variable).ToList();
@@ -227,6 +253,38 @@ namespace LexDriver
                     }
                 }
             }
+            else
+            {
+                var className = objectFunction.Children.Find(x => x.label == "id").value;
+                var varNameType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == className).Select(y => y.Field<string>("VariableType")).FirstOrDefault();
+                var paramType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") == className).Select(y => y.Field<string>("ParameterType")).FirstOrDefault();
+                if (!string.IsNullOrEmpty(varNameType))
+                {
+                    var classNode = allNodes.Where(x => x.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == varNameType).ToList();
+                    if (classNode.Count > 0)
+                    {
+                        var functionEntry = classNode.FirstOrDefault().m_symtab.AsEnumerable().Where(x => x.Field<string>("NodeType") == "Function" && x.Field<string>("Name") == variable).ToList();
+                        if (functionEntry.Count == 0)
+                        {
+                            Common.semanticErrors.Add("[error] Undeclared member function (search in class table): at line " + objectFunction.Children.Find(x => x.label == "id").line);
+                        }
+                    }
+                }
+                else if (!string.IsNullOrEmpty(paramType))
+                {
+                    var classNode = allNodes.Where(x => x.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == paramType).ToList();
+                    if (classNode.Count > 0)
+                    {
+                        var functionEntry = classNode.FirstOrDefault().m_symtab.AsEnumerable().Where(x => x.Field<string>("NodeType") == "Function" && x.Field<string>("Name") == variable).ToList();
+                        if (functionEntry.Count == 0)
+                        {
+                            Common.semanticErrors.Add("[error] Undeclared member function (search in class table): at line " + objectFunction.Children.Find(x => x.label == "id").line);
+                        }
+                    }
+                }
+
+            }
+
             return string.Empty;
         }
 

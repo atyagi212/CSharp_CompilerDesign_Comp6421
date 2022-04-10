@@ -158,32 +158,32 @@ namespace LexDriver
                 directoryInfo = new DirectoryInfo(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles");
                 arrFiles = directoryInfo.GetFiles();
 
-                //foreach (FileInfo file in arrFiles)
-                //{
-                //    MoonAsmCodeGenerator.arrFileContent = null;
-                //    string fileExt = Path.GetExtension(file.FullName);
-                //    string filename = Path.GetFileNameWithoutExtension(file.Name);
-                //    if (fileExt == ".imt")
-                //    {
-                //        try
-                //        {
-                //            MoonAsmCodeGenerator.arrFileContent = File.ReadAllLines(file.FullName);
-                //            if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon")))
-                //                using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon"))) ;
-                //            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "entry" + "\n");
-                //            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "addi   r14,r0,topaddr  % Set stack pointer" + "\n");
-                //            MoonAsmCodeGenerator moonObj = new MoonAsmCodeGenerator(filename);
-                //            moonObj.GenerateAssemblyCode();
+                foreach (FileInfo file in arrFiles)
+                {
+                    MoonAsmCodeGenerator.arrFileContent = null;
+                    string fileExt = Path.GetExtension(file.FullName);
+                    string filename = Path.GetFileNameWithoutExtension(file.Name);
+                    if (fileExt == ".imt")
+                    {
+                        try
+                        {
+                            MoonAsmCodeGenerator.arrFileContent = File.ReadAllLines(file.FullName);
+                            if (!File.Exists(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon")))
+                                using (File.Create(Path.Combine(pathOutput, Path.GetFileNameWithoutExtension(filename) + ".moon"))) ;
+                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "entry" + "\n");
+                            File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(filename) + ".moon"), "addi   r14,r0,topaddr  % Set stack pointer" + "\n");
+                            MoonAsmCodeGenerator moonObj = new MoonAsmCodeGenerator(filename);
+                            moonObj.GenerateAssemblyCode();
 
-                //        }
-                //        catch (IOException e)
-                //        {
-                //            Console.WriteLine(e.StackTrace);
-                //        }
+                        }
+                        catch (IOException e)
+                        {
+                            Console.WriteLine(e.StackTrace);
+                        }
 
-                //    }
+                    }
 
-                //}
+                }
 
             }
             catch (Exception err)
