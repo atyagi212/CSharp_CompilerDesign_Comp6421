@@ -19,7 +19,7 @@ namespace LexDriver
         public string ParentClass { get; set; }
         public int Size { get; set; }
 
-        public SymbolEntry(String nodeType, String name, String parameterName, String parameterType, String returnType, String variableName, String variableType, String varVisibility, String nodeVisibility, String inherits, String parentClass)
+        public SymbolEntry(string nodeType, string name, string parameterName, string parameterType, string returnType, string variableName, string variableType, string varVisibility, string nodeVisibility, string inherits, string parentClass)
         {
             NodeType = nodeType;
             Name = name;

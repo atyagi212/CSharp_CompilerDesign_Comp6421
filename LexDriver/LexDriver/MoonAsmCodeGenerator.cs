@@ -33,7 +33,6 @@ namespace LexDriver
             {
                 nextContentToRead = ProcessingTags(item.value, item.index, nextContentToRead, arrFileContent.ToList(), ref VarOrParam);
             }
-            //File.AppendAllText(filePath, "hlt" + "\n");
             foreach (var item in VarOrParam)
             {
                 int size = 0;

@@ -1,8 +1,0 @@
-
-start functionDef# main :void
-start generateStatementBlockCode
-varDeclare# integer s[4][2][3]
-readStatement# read s[0][0][0]
-writeStatement# write s[0][0][0]
-end generateStatementBlockCode
-end functionDef# main 

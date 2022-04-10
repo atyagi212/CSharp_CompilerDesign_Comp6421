@@ -17,25 +17,63 @@ namespace LexDriver
         public ASTNode PrintSemanticErrors(ASTNode p_Node)
         {
             var listImplementationNode = p_Node.Children.Find(x => x.label == "STRUCTORIMPLORFUNCLIST").Children;
-
-            foreach (var node in listImplementationNode)
+            Common.semanticErrors = new List<string>();
+            GetRootCodeErrors(listImplementationNode);
+            foreach (var node in listImplementationNode.Select((value, index) => new { index, value }))
             {
-                switch (node.label)
+                switch (node.value.label)
                 {
                     case "structDecl":
                         {
-                            FindClassErrors(node, listImplementationNode, node);
+                            FindClassErrors(node.value, listImplementationNode, node.value);
                             break;
                         }
                     case "funcDef":
                         {
-                            FindFunctionErrors(node, listImplementationNode, node);
+                            FindFunctionErrors(node.value, listImplementationNode, node.value);
                             break;
                         }
                 }
             }
             return p_Node;
 
+        }
+
+        private void GetRootCodeErrors(List<ASTNode> listImplementationNode)
+        {
+            var classNodes = listImplementationNode.FindAll(x => x.label == "structDecl");
+            string rootClass = string.Empty;
+            string rootInheritClass = string.Empty;
+            foreach (var node in classNodes)
+            {
+                var inheritNode = node;
+                bool isInhetitsFlag = true;
+                rootClass = node.Children.Find(x => x.label == "id").value;
+                while (isInhetitsFlag)
+                {
+                    rootInheritClass = GetInheritClass(inheritNode, classNodes);
+                    if (string.IsNullOrEmpty(rootInheritClass) || rootInheritClass == rootClass)
+                        isInhetitsFlag = false;
+                    else
+                    {
+                        inheritNode = classNodes.Where(x => x.Children.Find(y => y.label == "id").value == rootInheritClass).FirstOrDefault();
+                    }
+                }
+                if (string.IsNullOrEmpty(rootInheritClass))
+                    continue;
+                else if (rootClass == rootInheritClass)
+                    Common.semanticErrors.Add("[error] Circular class dependency (inheritance cycles): at line " + node.Children.Find(x => x.label == "id").line);
+            }
+
+        }
+
+        private string GetInheritClass(ASTNode node, List<ASTNode> classNodes)
+        {
+            var inheritsNode = node.m_symtab.AsEnumerable().Where(x => x.Field<string>("Inherits") != string.Empty && x.Field<string>("Inherits") != null).Select(y => y.Field<string>("Inherits")).ToList();
+            if (inheritsNode.Count > 0)
+                return inheritsNode[0];
+            else
+                return string.Empty;
         }
 
         private void CheckForAssignmentErrors(ASTNode p_Node, List<ASTNode> allNodes, ASTNode rootNode)
@@ -63,11 +101,47 @@ namespace LexDriver
                     break;
 
             }
-            //if (isComplexVar != null)
-            //    leftSideOutputType = GetComplexVarType(p_Node, parentClass, allNodes, rootNode);
+            if (isComplexVar != null)
+            {
+                var varName = isComplexVar.Children.Find(x => x.label == "id");
+                var varNameType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == varName.value).Select(y => y.Field<string>("VariableType")).FirstOrDefault();
+                var paramType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") == varName.value).Select(y => y.Field<string>("ParameterType")).FirstOrDefault();
+                if (!string.IsNullOrEmpty(varNameType) && Common.dictMemSize.ContainsKey(varNameType))
+                    Common.semanticErrors.Add("[error] '.' operator used on non-class type: at line " + varName.line);
+                else if (!string.IsNullOrEmpty(paramType) && Common.dictMemSize.ContainsKey(paramType))
+                    Common.semanticErrors.Add("[error] '.' operator used on non-class type: at line " + varName.line);
 
-            //if (isArrayVar.Children.Count>0)
-            //    leftSideOutputType = GetArrayVarType(p_Node, parentClass, allNodes, rootNode);
+                //leftSideOutputType = GetComplexVarType(p_Node, parentClass, allNodes, rootNode);
+            }
+
+            if (isArrayVar.Count > 0)
+            {
+                var nonIntIndexes = isArrayVar.Find(x => x.label != "intlit");
+                if (nonIntIndexes != null)
+                    Common.semanticErrors.Add("[error] Array index is not an integer: at line " + nonIntIndexes.line);
+                var varNameType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == variableName.value).Select(y => y.Field<string>("VariableType")).SingleOrDefault();
+                var paramType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") == variableName.value).Select(y => y.Field<string>("ParameterType")).SingleOrDefault();
+                if (!string.IsNullOrEmpty(varNameType))
+                {
+                    nonIntIndexes = isArrayVar.Find(x => x.label == "intlit");
+                    varNameType = varNameType.Trim();
+                    if ((varNameType.Split('[').Count() - 1) != isArrayVar.Count)
+                    {
+                        Common.semanticErrors.Add("[error] Use of array with wrong number of dimensions: at line " + nonIntIndexes.line);
+                    }
+                }
+                else if (!string.IsNullOrEmpty(paramType))
+                {
+                    nonIntIndexes = isArrayVar.Find(x => x.label == "intlit");
+                    paramType = paramType.Trim();
+                    if ((paramType.Split('[').Count() - 1) != isArrayVar.Count)
+                    {
+                        Common.semanticErrors.Add("[error] Use of array with wrong number of dimensions: at line " + nonIntIndexes.line);
+                    }
+                }
+
+                //leftSideOutputType = GetArrayVarType(p_Node, parentClass, allNodes, rootNode);
+            }
 
             if (variableName != null && isComplexVar == null && isArrayVar.Count == 0)
                 leftSideOutputType = GetVarType(variableName, parentClass, allNodes, rootNode);
@@ -80,13 +154,13 @@ namespace LexDriver
                 var localorGlobal = dt.AsEnumerable().Where(x => x.Field<string>("ParameterName") == variableName.value || x.Field<string>("VariableName") == variableName.value);
                 if (localorGlobal == null)
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable: at line " + variableName.line + "\n");
+                    Common.semanticErrors.Add("[error] Undeclared variable (check for existence of local variable): at line " + variableName.line);
                 }
             }
 
             if (!string.IsNullOrEmpty(leftSideOutputType) && !string.IsNullOrEmpty(rightSideOutputType) && leftSideOutputType != rightSideOutputType)
             {
-                File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable: at line " + variableName.line + "\n");
+                Common.semanticErrors.Add("[error] Undeclared variable (check for existence of local variable): at line " + variableName.line);
             }
         }
 
@@ -99,7 +173,7 @@ namespace LexDriver
 
                 if (paramCount.Count > 0 && varCount.Count > 0)
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple declaration of parameter: at line " + rootNode.line + "\n");
+                    Common.semanticErrors.Add("[error] multiply declaration of parameter: at line " + rootNode.line);
                     return string.Empty;
                 }
                 else if (paramCount.Count == 0 && varCount.Count > 0)
@@ -112,7 +186,7 @@ namespace LexDriver
                 }
                 else if (paramCount.Count == 0 && varCount.Count == 0)
                 {
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared local variable: at line " + variableName.line + "\n");
+                    Common.semanticErrors.Add("[error] Undeclared variable (check for existence of local variable): at line " + variableName.line);
                     return string.Empty;
                 }
                 else
@@ -165,26 +239,106 @@ namespace LexDriver
         {
             //var listImplementationNode = p_Node.Children.Find(x => x.label == "STRUCTORIMPLORFUNCLIST").Children;
             var functionCallName = p_Node.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "id");
+
             if (rootNode.Children.Find(x => x.label == "id").value != functionCallName.value)
             {
+                var funcCallParam = p_Node.Children.Find(x => x.label == "aParams").Children;
+                List<string> lstFuncCallTypes = GetFunctionCallTypes(funcCallParam, rootNode);
+                List<string> lstFuncDefTypes = new List<string>();
                 bool nameMatch = false;
+                bool paramCountMatch = false;
+                var funcDefParamCount = 0;
                 var allFuncNodes = allNodes.FindAll(x => x.label == "funcDef");
-                foreach (var node in allNodes)
+                foreach (var node in allFuncNodes)
                 {
                     if (node.Children.Find(x => x.label == "id").value == functionCallName.value)
+                    {
                         nameMatch = true;
+                        funcDefParamCount = node.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") != string.Empty).ToList().Count;
+                        lstFuncDefTypes = node.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") != string.Empty).Select(y => y.Field<string>("ParameterType")).ToList();
+
+                        if (funcCallParam.Count != funcDefParamCount && !paramCountMatch)
+                        {
+                            paramCountMatch = false;
+                        }
+                        else if (funcCallParam.Count == funcDefParamCount)
+                        {
+                            paramCountMatch = true;
+                        }
+
+                        if (lstFuncCallTypes.Count == lstFuncDefTypes.Count)
+                        {
+                            foreach (var item in lstFuncCallTypes.Select((val, index) => new { index, val }))
+                            {
+                                if (lstFuncDefTypes[item.index].Contains('['))
+                                {
+                                    if (item.val.Trim().Split('[')[0] != lstFuncDefTypes[item.index].Trim().Split('[')[0])
+                                    {
+                                        Common.semanticErrors.Add("[error] Function call with wrong type of parameters: at line " + functionCallName.line);
+                                        break;
+                                    }
+                                    else if ((item.val.Trim().Split('[').Count() - 1) != (lstFuncDefTypes[item.index].Trim().Split('[').Count() - 1))
+                                    {
+                                        Common.semanticErrors.Add("[error] Array parameter using wrong number of dimensions: at line " + functionCallName.line);
+                                        break;
+                                    }
+                                }
+                                else
+                                {
+                                    if (item.val.Trim() != lstFuncDefTypes[item.index].Trim())
+                                    {
+                                        Common.semanticErrors.Add("[error] Function call with wrong type of parameters: at line " + functionCallName.line);
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
                 }
                 if (!nameMatch)
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Undeclared free function: at line " + functionCallName.line + " \n");
+                    Common.semanticErrors.Add("[error] Undeclared free function: at line " + functionCallName.line);
+                if (!paramCountMatch && nameMatch)
+                    Common.semanticErrors.Add("[error] Function call with wrong number of parameters: at line " + functionCallName.line);
             }
 
 
         }
 
+        private List<string> GetFunctionCallTypes(List<ASTNode> funcCallParam, ASTNode rootNode)
+        {
+            List<string> lstFuncCallTypes = new List<string>();
+            if (funcCallParam.Count > 0)
+            {
+                foreach (var node in funcCallParam)
+                {
+                    if (node.label == "functionCallDataMember")
+                    {
+                        var paramName = node.Children.Find(x => x.label == "var0").Children.Find(y => y.label == "id").value;
+                        if (!string.IsNullOrEmpty(paramName))
+                        {
+                            var paramType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("ParameterName") == paramName).Select(y => y.Field<string>("ParameterType")).ToList();
+                            var varType = rootNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("VariableName") == paramName).Select(y => y.Field<string>("VariableType")).ToList();
+                            if (paramType.Count > 0)
+                            {
+                                lstFuncCallTypes.Add(paramType[0]);
+                            }
+                            else if (varType.Count > 0)
+                            {
+                                lstFuncCallTypes.Add(varType[0]);
+                            }
+                        }
+                    }
+                    else
+                        lstFuncCallTypes.Add(Common.dictTypes[node.label]);
+                }
+            }
+            return lstFuncCallTypes;
+        }
+
         private void FindFunctionErrors(ASTNode node, List<ASTNode> allNodes, ASTNode rootNode)
         {
             var StatementBlockNode = node.Children.Find(x => x.label == "statementBlock");
-            CheckFunctionGlobalErrors(node);
+            CheckFunctionGlobalErrors(node, allNodes);
             foreach (ASTNode child in StatementBlockNode.Children)
             {
 
@@ -196,10 +350,32 @@ namespace LexDriver
                 {
                     CheckForUndefinedErrors(child, allNodes, rootNode);
                 }
+                if (child.label == "varDecl")
+                {
+                    if (!Common.dictMemSize.ContainsKey(child.Children.Find(x => x.label == "type").value))
+                    {
+                        var getClassName = allNodes.Where(x => x.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == child.Children.Find(x => x.label == "type").value).ToList();
+                        if (getClassName == null || getClassName.Count == 0)
+                            Common.semanticErrors.Add("[error] undeclared class: at line " + child.Children.Find(x => x.label == "id").line);
+                    }
+                }
+            }
+            var paramsNode = node.Children.Find(x => x.label == "fparamList");
+            if (paramsNode.Children.Count > 0)
+            {
+                foreach (var child in paramsNode.Children)
+                {
+                    if (!Common.dictMemSize.ContainsKey(child.Children.Find(x => x.label == "type").value))
+                    {
+                        var getClassName = allNodes.Where(x => x.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == child.Children.Find(x => x.label == "type").value);
+                        if (getClassName == null)
+                            Common.semanticErrors.Add("[error] undeclared class: at line " + child.Children.Find(x => x.label == "id").line);
+                    }
+                }
             }
         }
 
-        private void CheckFunctionGlobalErrors(ASTNode node)
+        private void CheckFunctionGlobalErrors(ASTNode node, List<ASTNode> allNodes)
         {
             var GroupByParam = node.m_symtab.AsEnumerable().GroupBy(e => e.Field<string>("ParameterName")).Select(d => new { d.Key, Count = d.Count() }).ToList();
             var GroupByVar = node.m_symtab.AsEnumerable().GroupBy(e => e.Field<string>("VariableName")).Select(d => new { d.Key, Count = d.Count() }).ToList();
@@ -208,7 +384,7 @@ namespace LexDriver
             {
                 var result = GroupByParam.Where(x => x.Count > 1 && x.Key != string.Empty && x.Key != null).Select(y => y.Key).ToList();
                 if (result.Count > 0)
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple same name parameters: at line " + node.line + "\n");
+                    Common.semanticErrors.Add("[error] multiply same name parameters: at line " + node.line);
             }
 
             if (GroupByVar.Count > 0)
@@ -216,9 +392,34 @@ namespace LexDriver
                 var result = GroupByVar.Where(x => x.Count > 1 && x.Key != string.Empty && x.Key != null).Select(y => y.Key).ToList();
                 foreach (var item in result)
                 {
-                    var lineNumber = node.Children.Find(x => x.label == "statementBlock").Children.FindAll(y => y.label == "id").Find(z => z.value == item.ToString()).line;
-                    File.AppendAllText(Path.Combine(@"/Users/akshattyagi/Downloads/LexDriver/LexDriver/OutputFiles", Path.GetFileNameWithoutExtension(fileName) + ".outsemanticerrors"), "Multiple same name variables: at line " + lineNumber + "\n");
+                    int lineNumber = 0;
+                    var varNodes = node.Children.Find(x => x.label == "statementBlock").Children.FindAll(y => y.label == "varDecl");
+                    foreach (var varNode in varNodes)
+                    {
+                        if (varNode.Children.Find(p => p.label == "id").value == item.ToString())
+                            lineNumber = varNode.Children.Find(p => p.label == "id").line;
+                    }
+                    Common.semanticErrors.Add("[error] multiply declared identifier in function : at line " + lineNumber);
                 }
+            }
+
+            var funcDecl = allNodes.Where(x => x.label == "funcDef" && x.Children.Find(y => y.label == "id").value == node.Children.Find(z => z.label == "id").value).ToList();
+
+            if (funcDecl.Count() > 1)
+            {
+                int i = 1;
+                while (i < funcDecl.Count())
+                {
+                    if ((funcDecl[i].Children.Find(x => x.label == "fparamList").Children.Count() == funcDecl[0].Children.Find(x => x.label == "fparamList").Children.Count())
+                        && (funcDecl[i].Children.Find(x => x.label == "type").value == funcDecl[0].Children.Find(x => x.label == "type").value))
+                    {
+                        Common.semanticErrors.Add("[error] multiply declared free function: at line " + funcDecl[i].Children.Find(y => y.label == "id").line);
+                    }
+                    else
+                        Common.semanticErrors.Add("[warning] overloaded free function: at line " + funcDecl[i].Children.Find(y => y.label == "id").line);
+                    i++;
+                }
+
             }
         }
 
@@ -230,6 +431,7 @@ namespace LexDriver
                 if (childImplNode.Children.Find(y => y.label == "id").value == node.Children.Find(y => y.label == "id").value)
                 {
                     var functionDefList = childImplNode.Children.Find(x => x.label == "funcDefList").Children.FindAll(y => y.label == "funcDef");
+                    CheckforGlobalClassErrors(node, functionDefList, allNodes);
                     foreach (var funcNode in functionDefList)
                     {
                         var StatementBlockNode = funcNode.Children.Find(x => x.label == "statementBlock");
@@ -261,6 +463,114 @@ namespace LexDriver
             //    }
             //    FindClassErrors(child, allNodes, rootNode);
             //}
+        }
+
+        private void CheckforGlobalClassErrors(ASTNode node, List<ASTNode> functionDefList, List<ASTNode> allNodes)
+        {
+            List<string> implementedFunction = new List<string>();
+            List<string> declaredFunction = new List<string>();
+            List<string> varDecl = new List<string>();
+            ASTNode classNameNode = node.Children.Find(x => x.label == "id");
+            string inheritsClass = node.m_symtab.AsEnumerable().Where(e => e.Field<string>("NodeType") == "Class" && e.Field<string>("Name") == classNameNode.value && e.Field<string>("Inherits") != "").Select(d => d.Field<string>("Inherits")).ToList().Distinct().SingleOrDefault();
+
+            foreach (var implNode in functionDefList)
+            {
+                implementedFunction.Add(implNode.Children.Find(q => q.label == "id").value);
+            }
+            var memDeclNodes = node.Children.Find(x => x.label == "memberList").Children.FindAll(y => y.label == "membDecl");
+            if (memDeclNodes != null)
+            {
+                foreach (var memNode in memDeclNodes)
+                {
+                    var funcNode = memNode.Children.Find(x => x.label == "funcDecl");
+                    var varNode = memNode.Children.Find(x => x.label == "varDecl");
+                    if (varNode != null)
+                    {
+                        if (varDecl.Count() > 0 && varDecl.Contains(varNode.Children.Find(y => y.label == "id").value))
+                            Common.semanticErrors.Add("[error] multiply declared data member in class: at line " + varNode.Children.Find(y => y.label == "id").line);
+                        else
+                            varDecl.Add(varNode.Children.Find(y => y.label == "id").value);
+                    }
+                    if (funcNode != null)
+                    {
+                        if (declaredFunction.Count > 0 & declaredFunction.Contains(funcNode.Children.Find(y => y.label == "id").value))
+                            Common.semanticErrors.Add("[warning] overloaded member function: at line " + funcNode.Children.Find(y => y.label == "id").line);
+                        else
+                            declaredFunction.Add(funcNode.Children.Find(y => y.label == "id").value);
+                        if (!implementedFunction.Contains(funcNode.Children.Find(y => y.label == "id").value))
+                            Common.semanticErrors.Add("[error] undefined member function declaration: at line " + funcNode.Children.Find(y => y.label == "id").line);
+
+                        if (!string.IsNullOrEmpty(inheritsClass))
+                        {
+                            var inheritClassNode = allNodes.Where(p => p.label == "structDecl");
+                            foreach (var inheritClass in inheritClassNode)
+                            {
+                                var inheritNode = inheritClass.Children.Find(z => z.label == "id").value;
+                                if (inheritNode == inheritsClass)
+                                {
+                                    var inheritFunctNames = inheritClass.m_symtab.AsEnumerable().Where(x => x.Field<string>("NodeType") == "Function").Select(y => y.Field<string>("Name")).ToList().Distinct().ToList();
+                                    if (inheritFunctNames != null && inheritFunctNames.Count > 0)
+                                    {
+                                        if (inheritFunctNames.Contains(funcNode.Children.Find(y => y.label == "id").value))
+                                            Common.semanticErrors.Add("[warning] Overridden member function: at line " + funcNode.Children.Find(y => y.label == "id").line);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            foreach (var item in implementedFunction)
+            {
+                if (!declaredFunction.Contains(item))
+                {
+                    var listUndeclFunc = functionDefList.Where(x => x.Children.Find(y => y.label == "id").value == item);
+                    foreach (var undeclFunc in listUndeclFunc)
+                    {
+                        Common.semanticErrors.Add("[error] undeclared member function definition: at line " + undeclFunc.Children.Find(y => y.label == "id").line);
+                    }
+                }
+            }
+
+            var classDecl = allNodes.Where(x => x.label == "structDecl" && x.Children.Find(y => y.label == "id").value == node.Children.Find(z => z.label == "id").value).ToList();
+            if (classDecl.Count() > 1)
+            {
+                int i = 1;
+                while (i < classDecl.Count())
+                {
+                    Common.semanticErrors.Add("[error] multiply declared class: at line " + classDecl[i].Children.Find(y => y.label == "id").line);
+                    i++;
+                }
+
+            }
+
+            var varNames = node.m_symtab.AsEnumerable().Where(e => e.Field<string>("NodeType") == "Class" && e.Field<string>("Name") == classNameNode.value).Select(d => d.Field<string>("VariableName")).ToList();
+
+            var inheritVarNames = allNodes.Where(p => p.label == "structDecl").Where(y => y.Children.Find(z => z.label == "id").value == inheritsClass);
+            foreach (var classNode in inheritVarNames)
+            {
+                var variableInherits = classNode.m_symtab.AsEnumerable().Where(x => x.Field<string>("NodeType") == "Class").Select(y => y.Field<string>("VariableName")).ToList().Distinct().ToList();
+                var CommonVar = variableInherits.Intersect(varNames);
+                if (CommonVar != null && CommonVar.Count() > 0)
+                {
+                    foreach (var varName in CommonVar)
+                    {
+                        if (memDeclNodes != null)
+                        {
+                            foreach (var memNode in memDeclNodes)
+                            {
+                                var varNode = memNode.Children.Find(x => x.label == "varDecl");
+                                if (varNode != null)
+                                {
+                                    if (varNode.Children.Find(y => y.label == "id").value == varName)
+                                        Common.semanticErrors.Add("[warning] shadowed inherited data member: at line " + varNode.Children.Find(y => y.label == "id").line);
+
+                                }
+                            }
+                        }
+                    }
+                }
+            }
         }
 
         private void CheckForReturnTypeErrors(ASTNode p_Node)
